@@ -122,6 +122,14 @@
     .tour-ring-active {
       animation: tourPulseGlow 2s infinite !important;
     }
+
+    .tour-field-highlight {
+      border-color: #1f73b7 !important;
+      box-shadow: 0 0 0 2px rgba(31, 115, 183, 0.2);
+      border-radius: 10px;
+      background: rgba(239, 246, 255, 0.55);
+      transition: all 0.2s ease;
+    }
   </style>
 </head>
 <body class="h-screen w-screen overflow-hidden flex flex-col font-sans text-zdTextDark antialiased select-none">
@@ -814,7 +822,7 @@
             <table class="w-full text-left text-xs whitespace-nowrap">
               <thead class="bg-white text-slate-700 text-xs font-semibold border-b border-slate-200 sticky top-0 z-10">
                 <tr>
-                  <th class="py-3 px-3 w-8"><input type="checkbox" onclick="toggleSelectAllTickets(this)" class="w-4 h-4 rounded border-slate-300 text-[#1f73b7] focus:ring-0 cursor-pointer"></th>
+                  <th class="py-3 px-3 w-8"><input id="ticketSelectAllCheckbox" type="checkbox" onclick="toggleSelectAllTickets(this)" class="w-4 h-4 rounded border-slate-300 text-[#1f73b7] focus:ring-0 cursor-pointer"></th>
                   <th class="py-3 px-3">Ticket status</th>
                   <th class="py-3 px-3">ID</th>
                   <th class="py-3 px-3">Channel</th>
@@ -1033,7 +1041,7 @@
                 <div class="h-[1px] bg-slate-200/80 my-3"></div>
 
                 <!-- Field 5: Form (Matching Screenshot 2 exact dropdown markup) -->
-                <div>
+                <div id="formFieldContainer">
                   <label class="block text-slate-600 font-medium text-xs mb-1">Form</label>
                   <div class="relative">
                     <div id="formSelectBtn" onclick="toggleFormDropdown(event)" class="flex items-center justify-between p-2 bg-white border border-slate-200 rounded-lg shadow-sm cursor-pointer hover:border-[#1f73b7] transition-all">
@@ -2687,15 +2695,15 @@
   
   
   <!-- GUIDED ORIENTATION OVERLAY CONTAINER & CALLOUT BUBBLE -->
-  <div id="tourOverlayContainer" class="hidden fixed inset-0 z-[999] pointer-events-none">
+  <div id="tourOverlayContainer" class="hidden fixed inset-0 z-[10000] pointer-events-none">
     <!-- Dim Backdrop -->
-    <div id="tourBackdrop" class="fixed inset-0 bg-transparent pointer-events-none z-[998]"></div>
+    <div id="tourBackdrop" class="fixed inset-0 bg-transparent pointer-events-none z-[10000]"></div>
     
     <!-- Pulsing Highlight Ring -->
-    <div id="tourHighlightRing" class="fixed border-4 border-[#1f73b7] rounded-xl pointer-events-none z-[999] tour-ring-active shadow-[0_0_25px_rgba(31,115,183,0.7)] transition-all duration-200"></div>
+    <div id="tourHighlightRing" class="fixed border-4 border-[#1f73b7] rounded-xl pointer-events-none z-[10001] tour-ring-active shadow-[0_0_25px_rgba(31,115,183,0.7)] transition-all duration-200"></div>
     
     <!-- Floating Callout Context Bubble -->
-    <div id="tourCalloutBubble" class="fixed w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 p-5 pointer-events-auto z-[1000] transition-all duration-200">
+    <div id="tourCalloutBubble" class="fixed w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 p-5 pointer-events-auto z-[10002] transition-all duration-200">
       
       <!-- Step Counter & Close -->
       <div class="flex items-center justify-between mb-2">
@@ -2759,9 +2767,13 @@
         
         <!-- Phase 1: Guided Orientation (Active/Selectable) -->
         <div id="phaseCard-1" onclick="selectPhaseChoice(1)" class="p-4 rounded-xl border-2 border-[#1f73b7] bg-white shadow-md cursor-pointer relative transition-all hover:shadow-lg select-none">
-          <div class="flex items-center justify-between mb-1.5">
+          <div class="flex items-center gap-2 mb-1.5">
             <h3 id="phaseTitle-1" class="font-bold text-xs text-[#1f73b7]">Phase 1: Guided Orientation</h3>
-            <span class="w-2 h-2 rounded-full bg-[#1f73b7]"></span>
+            <span id="phase1CompletedBadge" class="hidden text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full items-center gap-1">
+              <i class="fa-solid fa-ticket text-[9px]"></i>
+              Completed
+            </span>
+            <span class="w-2 h-2 rounded-full bg-[#1f73b7] ml-auto"></span>
           </div>
           <p class="text-[11px] text-slate-600 leading-relaxed font-normal">Guided UI walk-through highlighting key navigation & sidebars.</p>
         </div>
@@ -3439,6 +3451,7 @@
       closeAddMenu();
       switchTab(draftId);
       showToast('Opened new ticket draft');
+      return draftId;
     }
 
     // --- CUSTOMERS DIRECTORY LOGIC & DATA ---
@@ -6355,6 +6368,8 @@
     let selectedPhaseNumber = 1;
     let currentTourStepIndex = 0;
     let isTourActive = false;
+    let tourDraftTabId = null;
+    let phase1TourCompleted = false;
 
     function selectPhaseChoice(phaseNum) {
       if (phaseNum !== 1 && phaseNum !== 3) return;
@@ -6407,28 +6422,33 @@
       },
       {
         step: 4,
-        title: "4. Organisations Directory",
+        title: "4. Ticket Creation & Brand Selection",
+        description: "Clicking + Add opens a new ticket draft. The Brand field is the primary selector that dictates which unique product fields and support forms will load.",
+        alert: "👉 ACTION: Click the Brand dropdown and select any Brand (e.g. Property Tree, Box + Dice, Agency Studio) to see its unique custom fields!",
+        targetId: "brandSelectBtn",
+        position: "bottom",
+        action: () => ensureTourDraftTicketTab()
+      },
+      {
+        step: 5,
+        title: "5. Organisations Directory",
         description: "Organisations group end-users by client accounts, enabling enterprise SLAs, shared ticket visibility, and domain mapping.",
         targetId: "pane-organisations",
         position: "bottom",
         action: () => switchNav('organisations')
       },
       {
-        step: 5,
-        title: "5. Ticket Creation & Brand Selection",
-        description: "Clicking + Add opens a new ticket draft. The Brand field is the primary selector that dictates which unique product fields and support forms will load.",
-        alert: "👉 ACTION: Click the Brand dropdown and select any Brand (e.g. Property Tree, Box + Dice, Agency Studio) to see its unique custom fields!",
-        targetId: "brandSelectBtn",
-        position: "bottom",
-        action: () => createNewTicketTab()
-      },
-      {
         step: 6,
         title: "6. Brand-Specific Unique Fields",
-        description: "Notice how the right drawer dynamically updated! Each Brand exposes specific tracking fields such as Product Type, Company Name, or Jira Keys.",
-        targetId: "fieldAssignee",
+        description: "This step auto-selects Brand and Form as Property Tree, then highlights all fields from Form downward so you can review mandatory and product-specific fields.",
+        targetId: "formFieldContainer",
         position: "left",
-        action: () => {}
+        action: () => {
+          ensureTourDraftTicketTab();
+          selectBrand('Property Tree', BRAND_ICONS_MAP['Property Tree'], true);
+          selectForm('Property Tree', false);
+          highlightFormAndDownFields();
+        }
       },
       {
         step: 7,
@@ -6461,16 +6481,21 @@
         description: "Global Search (Ctrl + K) searches across tickets, users, organizations, and knowledge base articles.",
         alert: "💡 POWER OPERATORS: Use syntax like 'type:ticket status:open', brand:'Property Tree', or 'assignee:me' to filter results instantly.",
         targetId: "globalSearchOverlayInput",
-        position: "bottom",
-        action: () => { toggleSearchOverlay(); }
+        position: "left",
+        action: () => { openSearchOverlayForTour(); }
       },
       {
         step: 11,
-        title: "11. Merging Duplicate Tickets",
-        description: "When a customer submits duplicate requests for the same issue, use Merge Ticket to consolidate message history into a primary ticket.",
-        targetId: "mergeTicketModal",
+        title: "11. Queue Selection & Action Options",
+        description: "Select ticket checkboxes to activate the bulk action bar. This is where you can run quick actions like Edit, Merge, Mark as spam, or Delete on selected tickets.",
+        targetId: "viewsBulkActionBar",
         position: "top",
-        action: () => { closeSearchOverlay(); openMergeFromTicketMenu(); }
+        action: () => {
+          closeSearchOverlay();
+          closeMergeTicketModal();
+          switchNav('views');
+          focusTourBulkActions();
+        }
       },
       {
         step: 12,
@@ -6478,15 +6503,82 @@
         description: "The Conversations Drawer enables agents to handle real-time customer messaging chats and convert live chat sessions directly into support tickets.",
         targetId: "conversationsDrawerDropdown",
         position: "left",
-        action: () => { closeMergeTicketModal(); setAgentChatStatus('Online'); toggleConversationsDrawer(); }
+        action: () => { closeMergeTicketModal(); cancelBulkSelection(); openConversationsDrawerForTour(); }
+      },
+      {
+        step: 13,
+        title: "13. Phase 1 Complete",
+        description: "Great work — you’ve completed the guided orientation. Next steps: continue to Phase 2 for specific scenario workflows, then Phase 3 for free roam, and finally complete the assessment in Phase 4.",
+        alert: "✅ Completing this step resets the simulator and marks Phase 1 as completed with a green ticket badge.",
+        targetId: null,
+        position: "top",
+        action: () => {
+          closeConversationsDrawer();
+          closeSearchOverlay();
+          closeMergeTicketModal();
+          cancelBulkSelection();
+        }
       }
     ];
+
+    function setPhase1CompletionBadge(isCompleted) {
+      phase1TourCompleted = !!isCompleted;
+      const badge = document.getElementById('phase1CompletedBadge');
+      if (badge) {
+        if (phase1TourCompleted) {
+          badge.classList.remove('hidden');
+          badge.classList.add('inline-flex');
+        } else {
+          badge.classList.add('hidden');
+          badge.classList.remove('inline-flex');
+        }
+      }
+    }
+
+    function ensureTourDraftTicketTab() {
+      switchNav('views');
+      if (tourDraftTabId && draftTickets[tourDraftTabId]) {
+        switchTab(tourDraftTabId);
+        return tourDraftTabId;
+      }
+      const createdDraftId = createNewTicketTab();
+      tourDraftTabId = createdDraftId || activeTabId;
+      return tourDraftTabId;
+    }
+
+    function clearTourFieldHighlights() {
+      const highlighted = document.querySelectorAll('.tour-field-highlight');
+      highlighted.forEach(el => el.classList.remove('tour-field-highlight'));
+    }
+
+    function highlightFormAndDownFields() {
+      clearTourFieldHighlights();
+      const formContainer = document.getElementById('formFieldContainer');
+      if (!formContainer) return;
+      let current = formContainer;
+      while (current) {
+        if (current.classList && !current.classList.contains('hidden')) {
+          current.classList.add('tour-field-highlight');
+        }
+        current = current.nextElementSibling;
+      }
+    }
+
+    function focusTourBulkActions() {
+      setTimeout(() => {
+        const rowCheckbox = document.querySelector('.ticket-row-checkbox');
+        if (rowCheckbox) rowCheckbox.checked = true;
+        updateViewsBulkActionBar();
+      }, 80);
+    }
 
     function startGuidedTour() {
       closePhaseModal();
       resetSimulationDataInternal();
       isTourActive = true;
       currentTourStepIndex = 0;
+      tourDraftTabId = null;
+      clearTourFieldHighlights();
       const overlay = document.getElementById('tourOverlayContainer');
       if (overlay) overlay.classList.remove('hidden');
       renderTourStep(0);
@@ -6499,6 +6591,7 @@
       }
       currentTourStepIndex = index;
       const stepData = GUIDED_TOUR_STEPS[index];
+      clearTourFieldHighlights();
 
       // Execute step action
       if (typeof stepData.action === 'function') {
@@ -6644,7 +6737,7 @@
 
     function nextTourStep() {
       if (currentTourStepIndex >= GUIDED_TOUR_STEPS.length - 1) {
-        endGuidedTour();
+        endGuidedTour(true);
       } else {
         renderTourStep(currentTourStepIndex + 1);
       }
@@ -6656,20 +6749,28 @@
       }
     }
 
-    function endGuidedTour() {
+    function endGuidedTour(isCompleted = false) {
       isTourActive = false;
+      clearTourFieldHighlights();
+      tourDraftTabId = null;
       const overlay = document.getElementById('tourOverlayContainer');
       if (overlay) overlay.classList.add('hidden');
       closeMergeTicketModal();
       closeConversationsDrawer();
       closeSearchOverlay();
-      switchNav('dashboard');
+      if (isCompleted) {
+        setPhase1CompletionBadge(true);
+        resetSimulationDataInternal();
+        openPhaseModal();
+      } else {
+        switchNav('dashboard');
+      }
       showToast('Guided Orientation Complete!');
     }
 
     function onBrandSelectedInTour(brandName) {
       if (isTourActive && brandName && brandName !== '-' && brandName !== 'Select brand') {
-        if (GUIDED_TOUR_STEPS[currentTourStepIndex] && GUIDED_TOUR_STEPS[currentTourStepIndex].step === 5) {
+        if (GUIDED_TOUR_STEPS[currentTourStepIndex] && GUIDED_TOUR_STEPS[currentTourStepIndex].targetId === 'brandSelectBtn') {
           setTimeout(() => {
             nextTourStep();
           }, 300);
@@ -6679,6 +6780,7 @@
 
     function openPhaseModal() {
       selectPhaseChoice(1);
+      setPhase1CompletionBadge(phase1TourCompleted);
       const modal = document.getElementById('phaseSelectionModal');
       if (modal) modal.classList.remove('hidden');
     }
@@ -6750,6 +6852,19 @@
       if (menu) {
         menu.classList.add('hidden');
       }
+    }
+
+    function openSearchOverlayForTour() {
+      const expandBox = document.getElementById('searchExpandBox');
+      if (expandBox && !expandBox.classList.contains('hidden')) return;
+      toggleSearchOverlay();
+    }
+
+    function openConversationsDrawerForTour() {
+      setChatStatus('Online');
+      const drawer = document.getElementById('conversationsDrawerDropdown');
+      if (drawer && !drawer.classList.contains('hidden')) return;
+      toggleConversationsDrawer();
     }
 
     function toggleSearchOverlay(event) {
