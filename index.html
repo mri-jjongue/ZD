@@ -6414,15 +6414,7 @@
       },
       {
         step: 3,
-        title: "3. Customers Directory",
-        description: "The Customers page manages end-user contact records, email addresses, timezone settings, and associated product access tags.",
-        targetId: "customerTableContainer",
-        position: "bottom",
-        action: () => switchNav('customers')
-      },
-      {
-        step: 4,
-        title: "4. Ticket Creation & Brand Selection",
+        title: "3. Ticket Creation & Brand Selection",
         description: "Clicking + Add opens a new ticket draft. The Brand field is the primary selector that dictates which unique product fields and support forms will load.",
         alert: "👉 ACTION: Click the Brand dropdown and select any Brand (e.g. Property Tree, Box + Dice, Agency Studio) to see its unique custom fields!",
         targetId: "brandSelectBtn",
@@ -6430,16 +6422,16 @@
         action: () => ensureTourDraftTicketTab()
       },
       {
-        step: 5,
-        title: "5. Organisations Directory",
+        step: 4,
+        title: "4. Organisations Directory",
         description: "Organisations group end-users by client accounts, enabling enterprise SLAs, shared ticket visibility, and domain mapping.",
         targetId: "pane-organisations",
         position: "bottom",
         action: () => switchNav('organisations')
       },
       {
-        step: 6,
-        title: "6. Brand-Specific Unique Fields",
+        step: 5,
+        title: "5. Brand-Specific Unique Fields",
         description: "This step auto-selects Brand and Form as Property Tree, then highlights all fields from Form downward so you can review mandatory and product-specific fields.",
         targetId: "formFieldContainer",
         position: "left",
@@ -6451,24 +6443,24 @@
         }
       },
       {
-        step: 7,
-        title: "7. Ticket Subject & Summary",
+        step: 6,
+        title: "6. Ticket Subject & Summary",
         description: "The Subject field defines the title of the ticket. Subject lines are indexed across views and global search.",
         targetId: "ticketSubjectInput",
         position: "bottom",
         action: () => {}
       },
       {
-        step: 8,
-        title: "8. Composer & Public/Internal Reply",
+        step: 7,
+        title: "7. Composer & Public/Internal Reply",
         description: "The composer allows you to draft responses. Toggle between 'Public Reply' (visible to customer) and 'Internal Note' (yellow tint, agent-only).",
         targetId: "composerBox",
         position: "top",
         action: () => {}
       },
       {
-        step: 9,
-        title: "9. Ticket Status & Immediate Submission",
+        step: 8,
+        title: "8. Ticket Status & Immediate Submission",
         description: "The submit control at bottom-right updates ticket status (Open, Pending, Hold, Solved) and saves all field changes.",
         alert: "⚠️ IMPORTANT: Selecting any status from the menu list immediately submits the ticket and saves all field states! If the composer is empty, status and fields update without adding a comment to the thread.",
         targetId: "submitStatusDropdownBtn",
@@ -6476,17 +6468,18 @@
         action: () => {}
       },
       {
-        step: 10,
-        title: "10. Global Search & Power Operators",
+        step: 9,
+        title: "9. Global Search & Power Operators",
         description: "Global Search (Ctrl + K) searches across tickets, users, organizations, and knowledge base articles.",
         alert: "💡 POWER OPERATORS: Use syntax like 'type:ticket status:open', brand:'Property Tree', or 'assignee:me' to filter results instantly.",
         targetId: "globalSearchOverlayInput",
         position: "left",
+        bubbleOverrides: { bubbleLeft: 12 },
         action: () => { openSearchOverlayForTour(); }
       },
       {
-        step: 11,
-        title: "11. Queue Selection & Action Options",
+        step: 10,
+        title: "10. Queue Selection & Action Options",
         description: "Select ticket checkboxes to activate the bulk action bar. This is where you can run quick actions like Edit, Merge, Mark as spam, or Delete on selected tickets.",
         targetId: "viewsBulkActionBar",
         position: "top",
@@ -6498,16 +6491,16 @@
         }
       },
       {
-        step: 12,
-        title: "12. Live Chat & Real-Time Messaging",
+        step: 11,
+        title: "11. Live Chat & Real-Time Messaging",
         description: "The Conversations Drawer enables agents to handle real-time customer messaging chats and convert live chat sessions directly into support tickets.",
-        targetId: "conversationsDrawerDropdown",
+        targetId: "conversationsBtn",
         position: "left",
         action: () => { closeMergeTicketModal(); cancelBulkSelection(); openConversationsDrawerForTour(); }
       },
       {
-        step: 13,
-        title: "13. Phase 1 Complete",
+        step: 12,
+        title: "12. Phase 1 Complete",
         description: "Great work — you’ve completed the guided orientation. Next steps: continue to Phase 2 for specific scenario workflows, then Phase 3 for free roam, and finally complete the assessment in Phase 4.",
         alert: "✅ Completing this step resets the simulator and marks Phase 1 as completed with a green ticket badge.",
         targetId: null,
@@ -6633,16 +6626,16 @@
       }
 
       // Position highlight ring & bubble immediately & on settling ticks
-      positionTourHighlightAndBubble(stepData.targetId, stepData.position);
+      positionTourHighlightAndBubble(stepData.targetId, stepData.position, stepData.bubbleOverrides);
       setTimeout(() => {
-        positionTourHighlightAndBubble(stepData.targetId, stepData.position);
+        positionTourHighlightAndBubble(stepData.targetId, stepData.position, stepData.bubbleOverrides);
       }, 50);
       setTimeout(() => {
-        positionTourHighlightAndBubble(stepData.targetId, stepData.position);
+        positionTourHighlightAndBubble(stepData.targetId, stepData.position, stepData.bubbleOverrides);
       }, 200);
     }
 
-    function positionTourHighlightAndBubble(targetId, posPref) {
+    function positionTourHighlightAndBubble(targetId, posPref, overrides) {
       const targetEl = targetId ? document.getElementById(targetId) : null;
       const ring = document.getElementById('tourHighlightRing');
       const bubble = document.getElementById('tourCalloutBubble');
@@ -6730,6 +6723,11 @@
       top = Math.max(margin, Math.min(top, maxTop));
       left = Math.max(margin, Math.min(left, maxLeft));
 
+      if (overrides) {
+        if (overrides.bubbleLeft !== undefined) left = overrides.bubbleLeft;
+        if (overrides.bubbleTop !== undefined) top = overrides.bubbleTop;
+      }
+
       bubble.style.top = top + 'px';
       bubble.style.left = left + 'px';
       bubble.style.transform = 'none';
@@ -6745,6 +6743,10 @@
 
     function prevTourStep() {
       if (currentTourStepIndex > 0) {
+        if (tourDraftTabId) {
+          closeTab(null, tourDraftTabId, true);
+          tourDraftTabId = null;
+        }
         renderTourStep(currentTourStepIndex - 1);
       }
     }
