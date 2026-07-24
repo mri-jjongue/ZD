@@ -389,7 +389,7 @@
             <span>Your work</span>
             <div class="h-[1px] flex-1 bg-slate-100 ml-2"></div>
           </div>
-          <button onclick="switchNav('dashboard')" class="w-full text-left px-3 py-2 rounded-lg bg-[#182126] text-white font-medium flex items-center space-x-2.5 shadow-sm">
+          <button id="homeTicketsShortcut" onclick="switchNav('dashboard')" class="w-full text-left px-3 py-2 rounded-lg bg-[#182126] text-white font-medium flex items-center space-x-2.5 shadow-sm">
             <i class="fa-solid fa-ticket text-xs"></i>
             <span>Tickets</span>
           </button>
@@ -2333,7 +2333,7 @@
             </div>
 
             <!-- Customers Table -->
-            <div class="flex-1 overflow-x-auto border-t border-slate-200">
+            <div id="customerTableContainer" class="flex-1 overflow-x-auto border-t border-slate-200">
               <table class="w-full text-left text-xs whitespace-nowrap">
                 <thead class="bg-white border-b border-slate-200 text-slate-700 text-xs font-semibold sticky top-0 z-10">
                   <tr>
@@ -2689,7 +2689,7 @@
   <!-- GUIDED ORIENTATION OVERLAY CONTAINER & CALLOUT BUBBLE -->
   <div id="tourOverlayContainer" class="hidden fixed inset-0 z-[999] pointer-events-none">
     <!-- Dim Backdrop -->
-    <div id="tourBackdrop" class="fixed inset-0 bg-slate-900/40 pointer-events-auto z-[998]"></div>
+    <div id="tourBackdrop" class="fixed inset-0 bg-transparent pointer-events-none z-[998]"></div>
     
     <!-- Pulsing Highlight Ring -->
     <div id="tourHighlightRing" class="fixed border-4 border-[#1f73b7] rounded-xl pointer-events-none z-[999] tour-ring-active shadow-[0_0_25px_rgba(31,115,183,0.7)] transition-all duration-200"></div>
@@ -6383,8 +6383,8 @@
         step: 1,
         title: "1. Home & Workload Dashboard",
         description: "Welcome to Zendesk Agent Workspace! The Home tab gives you a real-time overview of your queue activity, recent ticket metrics, and online status.",
-        alert: "💡 TIP: You can toggle your agent online status anytime using the top status indicator.",
-        targetId: "homeDrawer",
+        alert: "💡 TIP: Use the Tickets shortcut here to jump back to your active workload queue anytime.",
+        targetId: "homeTicketsShortcut",
         position: "right",
         action: () => switchNav('dashboard')
       },
@@ -6393,7 +6393,7 @@
         title: "2. Views & Ticket Queues",
         description: "The Views drawer segment incoming tickets into filtered queues such as 'My unresolved tickets', 'Unassigned tickets', 'Pending tickets', and 'Recently solved'.",
         alert: "💡 TIP: Clicking any view in the left sidebar filters the main ticket table immediately.",
-        targetId: "viewsDrawer",
+        targetId: "pane-views",
         position: "right",
         action: () => switchNav('views')
       },
@@ -6401,8 +6401,8 @@
         step: 3,
         title: "3. Customers Directory",
         description: "The Customers page manages end-user contact records, email addresses, timezone settings, and associated product access tags.",
-        targetId: "pane-customers",
-        position: "top",
+        targetId: "customerTableContainer",
+        position: "bottom",
         action: () => switchNav('customers')
       },
       {
@@ -6410,12 +6410,12 @@
         title: "4. Organisations Directory",
         description: "Organisations group end-users by client accounts, enabling enterprise SLAs, shared ticket visibility, and domain mapping.",
         targetId: "pane-organisations",
-        position: "top",
+        position: "bottom",
         action: () => switchNav('organisations')
       },
       {
         step: 5,
-        title: "5a. Ticket Creation & Brand Selection",
+        title: "5. Ticket Creation & Brand Selection",
         description: "Clicking + Add opens a new ticket draft. The Brand field is the primary selector that dictates which unique product fields and support forms will load.",
         alert: "👉 ACTION: Click the Brand dropdown and select any Brand (e.g. Property Tree, Box + Dice, Agency Studio) to see its unique custom fields!",
         targetId: "brandSelectBtn",
@@ -6424,7 +6424,7 @@
       },
       {
         step: 6,
-        title: "5b. Brand-Specific Unique Fields",
+        title: "6. Brand-Specific Unique Fields",
         description: "Notice how the right drawer dynamically updated! Each Brand exposes specific tracking fields such as Product Type, Company Name, or Jira Keys.",
         targetId: "fieldAssignee",
         position: "left",
@@ -6432,7 +6432,7 @@
       },
       {
         step: 7,
-        title: "5c. Ticket Subject & Summary",
+        title: "7. Ticket Subject & Summary",
         description: "The Subject field defines the title of the ticket. Subject lines are indexed across views and global search.",
         targetId: "ticketSubjectInput",
         position: "bottom",
@@ -6440,7 +6440,7 @@
       },
       {
         step: 8,
-        title: "5d. Composer & Public/Internal Reply",
+        title: "8. Composer & Public/Internal Reply",
         description: "The composer allows you to draft responses. Toggle between 'Public Reply' (visible to customer) and 'Internal Note' (yellow tint, agent-only).",
         targetId: "composerBox",
         position: "top",
@@ -6448,7 +6448,7 @@
       },
       {
         step: 9,
-        title: "5e. Ticket Status & Immediate Submission",
+        title: "9. Ticket Status & Immediate Submission",
         description: "The submit control at bottom-right updates ticket status (Open, Pending, Hold, Solved) and saves all field changes.",
         alert: "⚠️ IMPORTANT: Selecting any status from the menu list immediately submits the ticket and saves all field states! If the composer is empty, status and fields update without adding a comment to the thread.",
         targetId: "submitStatusDropdownBtn",
@@ -6457,7 +6457,7 @@
       },
       {
         step: 10,
-        title: "6. Global Search & Power Operators",
+        title: "10. Global Search & Power Operators",
         description: "Global Search (Ctrl + K) searches across tickets, users, organizations, and knowledge base articles.",
         alert: "💡 POWER OPERATORS: Use syntax like 'type:ticket status:open', brand:'Property Tree', or 'assignee:me' to filter results instantly.",
         targetId: "globalSearchOverlayInput",
@@ -6466,7 +6466,7 @@
       },
       {
         step: 11,
-        title: "7. Merging Duplicate Tickets",
+        title: "11. Merging Duplicate Tickets",
         description: "When a customer submits duplicate requests for the same issue, use Merge Ticket to consolidate message history into a primary ticket.",
         targetId: "mergeTicketModal",
         position: "top",
@@ -6474,7 +6474,7 @@
       },
       {
         step: 12,
-        title: "8. Live Chat & Real-Time Messaging",
+        title: "12. Live Chat & Real-Time Messaging",
         description: "The Conversations Drawer enables agents to handle real-time customer messaging chats and convert live chat sessions directly into support tickets.",
         targetId: "conversationsDrawerDropdown",
         position: "left",
@@ -6587,35 +6587,50 @@
 
       if (ring) {
         ring.style.display = 'block';
-        const pad = 6;
-        ring.style.top = Math.max(0, rect.top - pad) + 'px';
-        ring.style.left = Math.max(0, rect.left - pad) + 'px';
-        ring.style.width = Math.max(20, rect.width + pad * 2) + 'px';
-        ring.style.height = Math.max(20, rect.height + pad * 2) + 'px';
+        const pad = 8;
+        const viewportPad = 6;
+        const top = Math.max(viewportPad, rect.top - pad);
+        const left = Math.max(viewportPad, rect.left - pad);
+        const right = Math.min(window.innerWidth - viewportPad, rect.right + pad);
+        const bottom = Math.min(window.innerHeight - viewportPad, rect.bottom + pad);
+        ring.style.top = top + 'px';
+        ring.style.left = left + 'px';
+        ring.style.width = Math.max(20, right - left) + 'px';
+        ring.style.height = Math.max(20, bottom - top) + 'px';
       }
 
       const bRect = bubble.getBoundingClientRect();
       const bubbleWidth = (bRect && bRect.width > 0) ? bRect.width : 384;
       const bubbleHeight = (bRect && bRect.height > 0) ? bRect.height : 220;
 
+      const margin = 16;
+      const spaceAbove = rect.top - margin;
+      const spaceBelow = window.innerHeight - rect.bottom - margin;
+      const spaceLeft = rect.left - margin;
+      const spaceRight = window.innerWidth - rect.right - margin;
+
+      let resolvedPos = posPref || 'right';
+      if (resolvedPos === 'top' && spaceAbove < bubbleHeight && spaceBelow > spaceAbove) resolvedPos = 'bottom';
+      else if (resolvedPos === 'bottom' && spaceBelow < bubbleHeight && spaceAbove > spaceBelow) resolvedPos = 'top';
+      else if (resolvedPos === 'left' && spaceLeft < bubbleWidth && spaceRight > spaceLeft) resolvedPos = 'right';
+      else if (resolvedPos === 'right' && spaceRight < bubbleWidth && spaceLeft > spaceRight) resolvedPos = 'left';
+
       let top = 0;
       let left = 0;
-
-      if (posPref === 'right') {
+      if (resolvedPos === 'right') {
         top = rect.top + (rect.height / 2) - (bubbleHeight / 2);
         left = rect.right + 16;
-      } else if (posPref === 'bottom') {
+      } else if (resolvedPos === 'bottom') {
         top = rect.bottom + 16;
         left = rect.left + (rect.width / 2) - (bubbleWidth / 2);
-      } else if (posPref === 'left') {
+      } else if (resolvedPos === 'left') {
         top = rect.top + (rect.height / 2) - (bubbleHeight / 2);
         left = rect.left - bubbleWidth - 16;
-      } else { // 'top'
+      } else {
         top = rect.top - bubbleHeight - 16;
         left = rect.left + (rect.width / 2) - (bubbleWidth / 2);
       }
 
-      const margin = 16;
       const maxTop = window.innerHeight - bubbleHeight - margin;
       const maxLeft = window.innerWidth - bubbleWidth - margin;
 
