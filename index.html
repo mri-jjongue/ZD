@@ -6245,6 +6245,9 @@
     // --- DASHBOARD RENDER ---
     function renderDashboard() {
       const list = document.getElementById('dashboardTicketList');
+      const countText = document.getElementById('dashTicketCountText');
+      if (countText) countText.innerText = `${tickets.length} tickets`;
+      if (!list) return;
       list.innerHTML = '';
 
       tickets.slice(0, 4).forEach(t => {
@@ -6457,7 +6460,7 @@
         title: "6. Global Search & Power Operators",
         description: "Global Search (Ctrl + K) searches across tickets, users, organizations, and knowledge base articles.",
         alert: "💡 POWER OPERATORS: Use syntax like 'type:ticket status:open', brand:'Property Tree', or 'assignee:me' to filter results instantly.",
-        targetId: "globalSearchInput",
+        targetId: "globalSearchOverlayInput",
         position: "bottom",
         action: () => { toggleSearchOverlay(); }
       },
@@ -6473,9 +6476,9 @@
         step: 12,
         title: "8. Live Chat & Real-Time Messaging",
         description: "The Conversations Drawer enables agents to handle real-time customer messaging chats and convert live chat sessions directly into support tickets.",
-        targetId: "conversationsDrawer",
+        targetId: "conversationsDrawerDropdown",
         position: "left",
-        action: () => { closeMergeTicketModal(); toggleConversationsDrawer(); }
+        action: () => { closeMergeTicketModal(); setAgentChatStatus('Online'); toggleConversationsDrawer(); }
       }
     ];
 
