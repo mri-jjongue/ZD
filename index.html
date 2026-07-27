@@ -130,6 +130,12 @@
       background: rgba(239, 246, 255, 0.55);
       transition: all 0.2s ease;
     }
+
+    .tour-column-highlight {
+      background: rgba(239, 246, 255, 0.72);
+      box-shadow: inset 0 0 0 2px rgba(31, 115, 183, 0.3), 0 0 0 2px rgba(31, 115, 183, 0.12);
+      transition: all 0.2s ease;
+    }
   </style>
 </head>
 <body class="h-screen w-screen overflow-hidden flex flex-col font-sans text-zdTextDark antialiased select-none">
@@ -849,7 +855,7 @@
             <div class="flex items-center space-x-6">
               <span id="bulkSelectedCount" class="font-bold text-xs text-slate-800">1 ticket</span>
               
-              <div class="flex items-center space-x-6 text-xs font-semibold text-[#1f73b7]">
+              <div id="viewsBulkActionOptions" class="flex items-center space-x-6 text-xs font-semibold text-[#1f73b7]">
                 <!-- Edit -->
                 <button onclick="handleBulkEdit()" class="flex items-center space-x-1.5 hover:underline focus:outline-none cursor-pointer">
                   <i class="fa-solid fa-pencil text-xs text-[#1f73b7]"></i>
@@ -4839,7 +4845,7 @@
         return;
       }
 
-      list.forEach(t => {
+      list.forEach((t, index) => {
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50 cursor-pointer transition-colors";
         tr.onclick = () => openTicket(t.id);
@@ -4860,7 +4866,7 @@
         const subjectText = (t.subject && t.subject.trim() !== '') ? t.subject : 'Untitled Ticket';
 
         tr.innerHTML = `
-          <td class="py-3 px-3 w-8" onclick="event.stopPropagation()"><input type="checkbox" onchange="updateViewsBulkActionBar()" class="ticket-row-checkbox w-4 h-4 rounded border-slate-300 text-[#1f73b7] focus:ring-0 cursor-pointer"></td>
+          <td class="py-3 px-3 w-8" onclick="event.stopPropagation()"><input ${index === 0 ? 'id="tourSelectedTicketCheckbox"' : ''} type="checkbox" onchange="updateViewsBulkActionBar()" class="ticket-row-checkbox w-4 h-4 rounded border-slate-300 text-[#1f73b7] focus:ring-0 cursor-pointer"></td>
           <td class="py-3 px-3"><span class="zd-badge ${badgeClass}">${t.status}</span></td>
           <td class="py-3 px-3 font-mono font-medium text-slate-500">${t.id}</td>
           <td class="py-3 px-3 text-slate-600">${escapeHtml(channel)}</td>
@@ -6473,12 +6479,12 @@
       },
       {
         step: 6,
-        title: "6. Ticket Fields & Brand Form",
-        description: "This step opens a ticket draft, sets Brand and Form to Property Tree, and highlights the ticket fields panel so you can review the brand-specific fields that load.",
-        alert: "👉 ACTION: Brand and Form are preset to Property Tree here so every unique field for that brand is visible.",
+        title: "6. Ticket Fields for Property Tree",
+        description: "Review the full ticket fields column while the draft is preset to Brand: Property Tree and Form: Property Tree so the brand-specific fields are visible.",
+        alert: "👉 ACTION: The Brand and Form are both set to Property Tree here, and the full ticket field column is highlighted for review.",
         targetIds: ["ticketDetailsDrawer"],
-        bubbleTargetId: "ticketDetailsDrawer",
-        position: "right",
+        bubbleTargetId: "ticketConversationWorkspace",
+        position: "top",
         action: () => {
           closeAddMenu();
           ensureTourDraftTicketTab();
@@ -6516,8 +6522,8 @@
         step: 9,
         title: "9. Queue Actions After Selection",
         description: "Select one or more tickets to reveal the bulk action bar, where you can run actions such as Edit, Merge, Mark as spam, or Delete.",
-        targetIds: ["ticketSelectAllCheckbox", "viewsBulkActionBar"],
-        bubbleTargetId: "viewsBulkActionBar",
+        targetIds: ["tourSelectedTicketCheckbox", "viewsBulkActionOptions"],
+        bubbleTargetId: "viewsBulkActionOptions",
         position: "top",
         action: () => {
           closeAddMenu();
@@ -6569,19 +6575,15 @@
     }
 
     function clearTourFieldHighlights() {
-      const highlighted = document.querySelectorAll('.tour-field-highlight');
+      const highlighted = document.querySelectorAll('.tour-field-highlight, .tour-column-highlight');
       highlighted.forEach(el => el.classList.remove('tour-field-highlight'));
+      highlighted.forEach(el => el.classList.remove('tour-column-highlight'));
     }
 
     function highlightAllTicketFields() {
       clearTourFieldHighlights();
-      const container = document.getElementById('ticketDetailsFieldsContainer');
-      if (!container) return;
-      Array.from(container.children).forEach((child) => {
-        if (child.classList && !child.classList.contains('hidden') && child.offsetParent !== null) {
-          child.classList.add('tour-field-highlight');
-        }
-      });
+      const drawer = document.getElementById('ticketDetailsDrawer');
+      if (drawer) drawer.classList.add('tour-column-highlight');
     }
 
     function highlightFormAndDownFields() {
