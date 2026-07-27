@@ -6461,20 +6461,23 @@
       },
       {
         step: 5,
-        title: "5. Create New Ticket",
+        title: "6. Create New Ticket",
         description: "Use + Add to start a new ticket, then choose Ticket from the expanded menu.",
         alert: "💡 TIP: This is the quickest way to open a fresh draft from anywhere in the workspace.",
-        targetIds: ["addDropdownBtn", "addMenuDropdown", "addMenuTicketOption"],
-        bubbleTargetId: "addMenuDropdown",
-        position: "bottom",
+        targetIds: ["addDropdownBtn", "addMenuDropdown", "addMenuTicketOption", "ticketDetailsDrawer"],
+        bubbleTargetId: null,
+        position: "center",
         action: () => {
           closeSearchOverlay();
           closeConversationsDrawer();
           closeMergeTicketModal();
           cancelBulkSelection();
-          switchNav('dashboard');
-          const menu = document.getElementById('addMenuDropdown');
-          if (menu) menu.classList.remove('hidden');
+          ensureTourDraftTicketTab();
+          highlightAllTicketFields();
+          setTimeout(() => {
+            const menu = document.getElementById('addMenuDropdown');
+            if (menu) menu.classList.remove('hidden');
+          }, 150);
         }
       },
       {
@@ -6690,7 +6693,7 @@
       const targetIds = Array.isArray(stepData?.targetIds)
        ? stepData.targetIds.filter(Boolean)
        : (stepData?.targetId ? [stepData.targetId] : []);
-      const bubbleTargetId = stepData?.bubbleTargetId || targetIds[0] || null;
+      const bubbleTargetId = stepData?.bubbleTargetId != null ? stepData.bubbleTargetId : (targetIds[0] || null);
       const posPref = stepData?.position;
       const overrides = stepData?.bubbleOverrides;
       const ringLayer = document.getElementById('tourHighlightRings');
@@ -6698,6 +6701,42 @@
 
       if (!bubble) return;
       if (ringLayer) ringLayer.innerHTML = '';
+
+      // Draw highlight rings for all target elements
+      const targetRects = targetIds
+       .map((targetId) => {
+         const el = document.getElementById(targetId);
+         if (!el) return null;
+         const rect = el.getBoundingClientRect();
+         if (!rect || rect.width === 0 || rect.height === 0) return null;
+         return { el, rect, targetId };
+       })
+       .filter(Boolean);
+
+      if (ringLayer) {
+       targetRects.forEach(({ rect: targetRect }) => {
+         const ring = createTourHighlightRing();
+         const pad = 8;
+         const viewportPad = 6;
+         const top = Math.max(viewportPad, targetRect.top - pad);
+         const left = Math.max(viewportPad, targetRect.left - pad);
+         const right = Math.min(window.innerWidth - viewportPad, targetRect.right + pad);
+         const bottom = Math.min(window.innerHeight - viewportPad, targetRect.bottom + pad);
+         ring.style.top = top + 'px';
+         ring.style.left = left + 'px';
+         ring.style.width = Math.max(20, right - left) + 'px';
+         ring.style.height = Math.max(20, bottom - top) + 'px';
+         ringLayer.appendChild(ring);
+       });
+      }
+
+      // Centre the bubble if position is "center"
+      if (posPref === 'center') {
+       bubble.style.top = '50%';
+       bubble.style.left = '50%';
+       bubble.style.transform = 'translate(-50%, -50%)';
+       return;
+      }
 
       const anchorEl = bubbleTargetId ? document.getElementById(bubbleTargetId) : null;
 
@@ -6716,16 +6755,6 @@
        }
       } catch (e) {}
 
-      const targetRects = targetIds
-       .map((targetId) => {
-         const el = document.getElementById(targetId);
-         if (!el) return null;
-         const rect = el.getBoundingClientRect();
-         if (!rect || rect.width === 0 || rect.height === 0) return null;
-         return { el, rect, targetId };
-       })
-       .filter(Boolean);
-
       const anchorTarget = targetRects.find(({ targetId }) => targetId === bubbleTargetId) || targetRects[0];
       const rect = anchorTarget ? anchorTarget.rect : null;
 
@@ -6737,23 +6766,6 @@
          bubble.style.transform = 'translate(-50%, -50%)';
        }
        return;
-      }
-
-      if (ringLayer) {
-       targetRects.forEach(({ rect: targetRect }) => {
-         const ring = createTourHighlightRing();
-         const pad = 8;
-         const viewportPad = 6;
-         const top = Math.max(viewportPad, targetRect.top - pad);
-         const left = Math.max(viewportPad, targetRect.left - pad);
-         const right = Math.min(window.innerWidth - viewportPad, targetRect.right + pad);
-         const bottom = Math.min(window.innerHeight - viewportPad, targetRect.bottom + pad);
-         ring.style.top = top + 'px';
-         ring.style.left = left + 'px';
-         ring.style.width = Math.max(20, right - left) + 'px';
-         ring.style.height = Math.max(20, bottom - top) + 'px';
-         ringLayer.appendChild(ring);
-       });
       }
 
       const bRect = bubble.getBoundingClientRect();
