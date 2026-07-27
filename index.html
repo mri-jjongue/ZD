@@ -157,7 +157,7 @@
           <div class="px-4 py-1 text-xs font-bold text-slate-700">New</div>
           <div class="h-[1px] bg-slate-100 my-1 mx-2"></div>
           
-          <div onclick="createNewTicketTab(); closeAddMenu();" class="relative group mx-1">
+          <div id="addMenuTicketOption" onclick="createNewTicketTab(); closeAddMenu();" class="relative group mx-1">
             <div class="w-1 h-full bg-[#1f73b7] rounded-full absolute left-0 top-0"></div>
             <div class="px-3 py-1.5 bg-slate-100/80 rounded-md text-xs font-medium text-slate-800 flex items-center justify-between cursor-pointer ml-1">
               <span>Ticket</span>
@@ -669,7 +669,7 @@
             </div>
 
             <!-- Empty State Container Box -->
-            <div class="flex-1 bg-white border border-slate-200 rounded-xl flex flex-col items-center justify-center p-8 text-center min-h-[420px] shadow-sm">
+            <div id="dashboardWorkloadContainer" class="flex-1 bg-white border border-slate-200 rounded-xl flex flex-col items-center justify-center p-8 text-center min-h-[420px] shadow-sm">
               <!-- Line Art Sailor SVG Graphic -->
               <div class="w-48 h-48 mb-3 flex items-center justify-center">
                 <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full text-slate-300">
@@ -904,9 +904,9 @@
           <div class="flex-1 flex h-full overflow-hidden">
             
             <!-- LEFT TICKET DETAILS DRAWER (Markup 2 & Markup 3: Matching Screenshot 1) -->
-            <aside class="w-64 bg-white border-r border-slate-200 shrink-0 flex flex-col justify-between h-full">
+            <aside id="ticketDetailsDrawer" class="w-64 bg-white border-r border-slate-200 shrink-0 flex flex-col justify-between h-full">
               <!-- Scrollable Sidebar Fields Container -->
-              <div class="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs">
+              <div id="ticketDetailsFieldsContainer" class="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs">
                 
                 <!-- Validation Errors Container (Matching Screenshot Red Box Markup) -->
                 <div id="ticketValidationErrorBox" class="hidden bg-rose-50 border border-rose-200 text-rose-600 rounded-md p-3 text-xs space-y-1 font-normal">
@@ -2127,7 +2127,7 @@
             </aside>
             
             <!-- TICKET MAIN WORKSPACE (Subject Row + Feed + Composer) -->
-            <div class="flex-1 flex flex-col h-full overflow-hidden bg-white">
+            <div id="ticketConversationWorkspace" class="flex-1 flex flex-col h-full overflow-hidden bg-white">
               
               <!-- Subject Field Row (Bold, increased font size + far-right action option icons) -->
               <div class="border-b border-slate-200 bg-white px-4 py-2.5 shrink-0 flex items-center justify-between relative">
@@ -2255,7 +2255,7 @@
                 <!-- Bottom Action Controls Bar (Matching Mockup exact layout) -->
                 <div class="flex justify-end items-center pt-2">
                   <!-- Right Action Buttons: Close Tab & Submit as New (Markup 4 + Screenshot 2) -->
-                  <div class="flex items-center space-x-3">
+                  <div id="ticketSubmitControls" class="flex items-center space-x-3">
                     <div class="relative">
                       <button onclick="closeCurrentTicketTab()" class="text-xs font-normal text-slate-700 hover:text-slate-900 flex items-center space-x-1 cursor-pointer">
                         <span>Close tab</span>
@@ -2413,7 +2413,7 @@
             </div>
 
             <!-- Organisations Table -->
-            <div class="flex-1 overflow-x-auto border-t border-slate-200">
+            <div id="orgTableContainer" class="flex-1 overflow-x-auto border-t border-slate-200">
               <table class="w-full text-left text-xs whitespace-nowrap">
                 <thead class="bg-white border-b border-slate-200 text-slate-700 text-xs font-semibold sticky top-0 z-10">
                   <tr>
@@ -2699,15 +2699,15 @@
     <!-- Dim Backdrop -->
     <div id="tourBackdrop" class="fixed inset-0 bg-transparent pointer-events-none z-[10000]"></div>
     
-    <!-- Pulsing Highlight Ring -->
-    <div id="tourHighlightRing" class="fixed border-4 border-[#1f73b7] rounded-xl pointer-events-none z-[10001] tour-ring-active shadow-[0_0_25px_rgba(31,115,183,0.7)] transition-all duration-200"></div>
+    <!-- Pulsing Highlight Rings -->
+    <div id="tourHighlightRings" class="fixed inset-0 pointer-events-none z-[10001]"></div>
     
     <!-- Floating Callout Context Bubble -->
     <div id="tourCalloutBubble" class="fixed w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 p-5 pointer-events-auto z-[10002] transition-all duration-200">
       
       <!-- Step Counter & Close -->
       <div class="flex items-center justify-between mb-2">
-        <span id="tourStepCounter" class="text-[10px] font-bold text-[#1f73b7] bg-blue-50 px-2.5 py-0.5 rounded-full uppercase tracking-wider">Step 1 of 11</span>
+        <span id="tourStepCounter" class="text-[10px] font-bold text-[#1f73b7] bg-blue-50 px-2.5 py-0.5 rounded-full uppercase tracking-wider">Step 1 of 10</span>
         <button type="button" onclick="endGuidedTour()" title="Exit Guided Tour" class="text-slate-400 hover:text-slate-600 transition-colors p-1 cursor-pointer text-xs focus:outline-none">
           <i class="fa-solid fa-xmark"></i>
         </button>
@@ -6399,91 +6399,128 @@
         title: "1. Home & Workload Dashboard",
         description: "Welcome to Zendesk Agent Workspace! The Home tab gives you a real-time overview of your queue activity, recent ticket metrics, and online status.",
         alert: "💡 TIP: Use the Tickets shortcut here to jump back to your active workload queue anytime.",
-        targetId: "homeTicketsShortcut",
+        targetIds: ["nav-dashboard", "homeTicketsShortcut", "dashboardWorkloadContainer"],
+        bubbleTargetId: "homeTicketsShortcut",
         position: "right",
-        action: () => switchNav('dashboard')
+        action: () => {
+          closeAddMenu();
+          closeSearchOverlay();
+          closeConversationsDrawer();
+          closeMergeTicketModal();
+          cancelBulkSelection();
+          switchNav('dashboard');
+        }
       },
       {
         step: 2,
         title: "2. Views & Ticket Queues",
         description: "The Views drawer segment incoming tickets into filtered queues such as 'My unresolved tickets', 'Unassigned tickets', 'Pending tickets', and 'Recently solved'.",
         alert: "💡 TIP: Clicking any view in the left sidebar filters the main ticket table immediately.",
-        targetId: "pane-views",
+        targetIds: ["nav-views", "pane-views"],
+        bubbleTargetId: "pane-views",
         position: "right",
         action: () => switchNav('views')
       },
       {
         step: 3,
-        title: "3. Ticket Creation & Brand Selection",
-        description: "Clicking + Add opens a new ticket draft. The Brand field is the primary selector that dictates which unique product fields and support forms will load.",
-        alert: "👉 ACTION: Click the Brand dropdown and select any Brand (e.g. Property Tree, Box + Dice, Agency Studio) to see its unique custom fields!",
-        targetId: "brandSelectBtn",
-        position: "bottom",
-        action: () => ensureTourDraftTicketTab()
+        title: "3. Customers Directory",
+        description: "Use the Customers area to search, review, and manage end-user records from the main customer list.",
+        targetIds: ["nav-customers", "customerTableContainer"],
+        bubbleTargetId: "customerTableContainer",
+        position: "top",
+        action: () => {
+          closeAddMenu();
+          closeSearchOverlay();
+          closeConversationsDrawer();
+          closeMergeTicketModal();
+          cancelBulkSelection();
+          switchNav('customers');
+        }
       },
       {
         step: 4,
         title: "4. Organisations Directory",
         description: "Organisations group end-users by client accounts, enabling enterprise SLAs, shared ticket visibility, and domain mapping.",
-        targetId: "pane-organisations",
-        position: "bottom",
-        action: () => switchNav('organisations')
+        targetIds: ["nav-organisations", "orgTableContainer"],
+        bubbleTargetId: "orgTableContainer",
+        position: "top",
+        action: () => {
+          closeAddMenu();
+          closeSearchOverlay();
+          closeConversationsDrawer();
+          closeMergeTicketModal();
+          cancelBulkSelection();
+          switchNav('organisations');
+        }
       },
       {
         step: 5,
-        title: "5. Brand-Specific Unique Fields",
-        description: "This step auto-selects Brand and Form as Property Tree, then highlights all fields from Form downward so you can review mandatory and product-specific fields.",
-        targetId: "formFieldContainer",
-        position: "left",
+        title: "5. Create New Ticket",
+        description: "Use + Add to start a new ticket, then choose Ticket from the expanded menu.",
+        alert: "💡 TIP: This is the quickest way to open a fresh draft from anywhere in the workspace.",
+        targetIds: ["addDropdownBtn", "addMenuDropdown", "addMenuTicketOption"],
+        bubbleTargetId: "addMenuDropdown",
+        position: "bottom",
         action: () => {
-          ensureTourDraftTicketTab();
-          selectBrand('Property Tree', BRAND_ICONS_MAP['Property Tree'], true);
-          selectForm('Property Tree', false);
-          highlightFormAndDownFields();
+          closeSearchOverlay();
+          closeConversationsDrawer();
+          closeMergeTicketModal();
+          cancelBulkSelection();
+          switchNav('dashboard');
+          const menu = document.getElementById('addMenuDropdown');
+          if (menu) menu.classList.remove('hidden');
         }
       },
       {
         step: 6,
-        title: "6. Ticket Subject & Summary",
-        description: "The Subject field defines the title of the ticket. Subject lines are indexed across views and global search.",
-        targetId: "ticketSubjectInput",
-        position: "bottom",
-        action: () => {}
+        title: "6. Ticket Fields & Brand Form",
+        description: "This step opens a ticket draft, sets Brand and Form to Property Tree, and highlights the ticket fields panel so you can review the brand-specific fields that load.",
+        alert: "👉 ACTION: Brand and Form are preset to Property Tree here so every unique field for that brand is visible.",
+        targetIds: ["ticketDetailsDrawer"],
+        bubbleTargetId: "ticketDetailsDrawer",
+        position: "right",
+        action: () => {
+          closeAddMenu();
+          ensureTourDraftTicketTab();
+          selectBrand('Property Tree', BRAND_ICONS_MAP['Property Tree'], true);
+          selectForm('Property Tree', false);
+          highlightAllTicketFields();
+        }
       },
       {
         step: 7,
-        title: "7. Composer & Public/Internal Reply",
-        description: "The composer allows you to draft responses. Toggle between 'Public Reply' (visible to customer) and 'Internal Note' (yellow tint, agent-only).",
-        targetId: "composerBox",
-        position: "top",
-        action: () => {}
+        title: "7. Ticket Conversation Workspace",
+        description: "This main ticket workspace includes the Subject, the customer conversation thread, the composer, and the Submit as action controls.",
+        targetIds: ["ticketConversationWorkspace", "ticketSubmitControls"],
+        bubbleTargetId: "ticketConversationWorkspace",
+        position: "left",
+        action: () => {
+          closeAddMenu();
+          closeSearchOverlay();
+          closeConversationsDrawer();
+          closeMergeTicketModal();
+        }
       },
       {
         step: 8,
-        title: "8. Ticket Status & Immediate Submission",
-        description: "The submit control at bottom-right updates ticket status (Open, Pending, Hold, Solved) and saves all field changes.",
-        alert: "⚠️ IMPORTANT: Selecting any status from the menu list immediately submits the ticket and saves all field states! If the composer is empty, status and fields update without adding a comment to the thread.",
-        targetId: "submitStatusDropdownBtn",
-        position: "top",
-        action: () => {}
+        title: "8. Global Search",
+        description: "Use the search field to quickly find tickets, users, organisations, and side conversations across the workspace.",
+        alert: "💡 POWER OPERATORS: Use syntax like type:ticket status:open, brand:'Property Tree', or assignee:me to narrow results.",
+        targetIds: ["searchTriggerBtn", "searchExpandBox"],
+        bubbleTargetId: "searchExpandBox",
+        position: "left",
+        bubbleOverrides: { bubbleLeft: 12 },
+        action: () => { closeAddMenu(); openSearchOverlayForTour(); }
       },
       {
         step: 9,
-        title: "9. Global Search & Power Operators",
-        description: "Global Search (Ctrl + K) searches across tickets, users, organizations, and knowledge base articles.",
-        alert: "💡 POWER OPERATORS: Use syntax like 'type:ticket status:open', brand:'Property Tree', or 'assignee:me' to filter results instantly.",
-        targetId: "globalSearchOverlayInput",
-        position: "left",
-        bubbleOverrides: { bubbleLeft: 12 },
-        action: () => { openSearchOverlayForTour(); }
-      },
-      {
-        step: 10,
-        title: "10. Queue Selection & Action Options",
-        description: "Select ticket checkboxes to activate the bulk action bar. This is where you can run quick actions like Edit, Merge, Mark as spam, or Delete on selected tickets.",
-        targetId: "viewsBulkActionBar",
+        title: "9. Queue Actions After Selection",
+        description: "Select one or more tickets to reveal the bulk action bar, where you can run actions such as Edit, Merge, Mark as spam, or Delete.",
+        targetIds: ["ticketSelectAllCheckbox", "viewsBulkActionBar"],
+        bubbleTargetId: "viewsBulkActionBar",
         position: "top",
         action: () => {
+          closeAddMenu();
           closeSearchOverlay();
           closeMergeTicketModal();
           switchNav('views');
@@ -6491,25 +6528,17 @@
         }
       },
       {
-        step: 11,
-        title: "11. Live Chat & Real-Time Messaging",
-        description: "The Conversations Drawer enables agents to handle real-time customer messaging chats and convert live chat sessions directly into support tickets.",
-        targetId: "conversationsBtn",
+        step: 10,
+        title: "10. Chat Widget & Conversations",
+        description: "The chat widget controls your availability, while Conversations shows the live queue of incoming chats ready for agent handling.",
+        targetIds: ["chatWidgetBtn", "conversationsBtn", "conversationsDrawerDropdown"],
+        bubbleTargetId: "conversationsDrawerDropdown",
         position: "left",
-        action: () => { closeMergeTicketModal(); cancelBulkSelection(); openConversationsDrawerForTour(); }
-      },
-      {
-        step: 12,
-        title: "12. Phase 1 Complete",
-        description: "Great work — you’ve completed the guided orientation. Next steps: continue to Phase 2 for specific scenario workflows, then Phase 3 for free roam, and finally complete the assessment in Phase 4.",
-        alert: "✅ Completing this step resets the simulator and marks Phase 1 as completed with a green ticket badge.",
-        targetId: null,
-        position: "top",
         action: () => {
-          closeConversationsDrawer();
           closeSearchOverlay();
           closeMergeTicketModal();
           cancelBulkSelection();
+          openConversationsDrawerForTour();
         }
       }
     ];
@@ -6544,6 +6573,17 @@
       highlighted.forEach(el => el.classList.remove('tour-field-highlight'));
     }
 
+    function highlightAllTicketFields() {
+      clearTourFieldHighlights();
+      const container = document.getElementById('ticketDetailsFieldsContainer');
+      if (!container) return;
+      Array.from(container.children).forEach((child) => {
+        if (child.classList && !child.classList.contains('hidden') && child.offsetParent !== null) {
+          child.classList.add('tour-field-highlight');
+        }
+      });
+    }
+
     function highlightFormAndDownFields() {
       clearTourFieldHighlights();
       const formContainer = document.getElementById('formFieldContainer');
@@ -6571,7 +6611,10 @@
       isTourActive = true;
       currentTourStepIndex = 0;
       tourDraftTabId = null;
+      closeAddMenu();
       clearTourFieldHighlights();
+      const ringLayer = document.getElementById('tourHighlightRings');
+      if (ringLayer) ringLayer.innerHTML = '';
       const overlay = document.getElementById('tourOverlayContainer');
       if (overlay) overlay.classList.remove('hidden');
       renderTourStep(0);
@@ -6626,63 +6669,89 @@
       }
 
       // Position highlight ring & bubble immediately & on settling ticks
-      positionTourHighlightAndBubble(stepData.targetId, stepData.position, stepData.bubbleOverrides);
+      positionTourHighlightAndBubble(stepData);
       setTimeout(() => {
-        positionTourHighlightAndBubble(stepData.targetId, stepData.position, stepData.bubbleOverrides);
+       positionTourHighlightAndBubble(stepData);
       }, 50);
       setTimeout(() => {
-        positionTourHighlightAndBubble(stepData.targetId, stepData.position, stepData.bubbleOverrides);
+       positionTourHighlightAndBubble(stepData);
       }, 200);
     }
 
-    function positionTourHighlightAndBubble(targetId, posPref, overrides) {
-      const targetEl = targetId ? document.getElementById(targetId) : null;
-      const ring = document.getElementById('tourHighlightRing');
+    function createTourHighlightRing() {
+      const ring = document.createElement('div');
+      ring.className = 'fixed border-4 border-[#1f73b7] rounded-xl pointer-events-none tour-ring-active shadow-[0_0_25px_rgba(31,115,183,0.7)] transition-all duration-200';
+      return ring;
+    }
+
+    function positionTourHighlightAndBubble(stepData) {
+      const targetIds = Array.isArray(stepData?.targetIds)
+       ? stepData.targetIds.filter(Boolean)
+       : (stepData?.targetId ? [stepData.targetId] : []);
+      const bubbleTargetId = stepData?.bubbleTargetId || targetIds[0] || null;
+      const posPref = stepData?.position;
+      const overrides = stepData?.bubbleOverrides;
+      const ringLayer = document.getElementById('tourHighlightRings');
       const bubble = document.getElementById('tourCalloutBubble');
 
       if (!bubble) return;
+      if (ringLayer) ringLayer.innerHTML = '';
 
-      if (!targetEl) {
-        if (bubble) {
-          bubble.style.top = '50%';
-          bubble.style.left = '50%';
-          bubble.style.transform = 'translate(-50%, -50%)';
-        }
-        if (ring) ring.style.display = 'none';
-        return;
+      const anchorEl = bubbleTargetId ? document.getElementById(bubbleTargetId) : null;
+
+      if (!anchorEl && targetIds.length === 0) {
+       if (bubble) {
+         bubble.style.top = '50%';
+         bubble.style.left = '50%';
+         bubble.style.transform = 'translate(-50%, -50%)';
+       }
+       return;
       }
 
       try {
-        if (typeof targetEl.scrollIntoView === 'function') {
-          targetEl.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'center' });
-        }
+       if (anchorEl && typeof anchorEl.scrollIntoView === 'function') {
+         anchorEl.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'center' });
+       }
       } catch (e) {}
 
-      const rect = targetEl.getBoundingClientRect();
+      const targetRects = targetIds
+       .map((targetId) => {
+         const el = document.getElementById(targetId);
+         if (!el) return null;
+         const rect = el.getBoundingClientRect();
+         if (!rect || rect.width === 0 || rect.height === 0) return null;
+         return { el, rect, targetId };
+       })
+       .filter(Boolean);
+
+      const anchorTarget = targetRects.find(({ targetId }) => targetId === bubbleTargetId) || targetRects[0];
+      const rect = anchorTarget ? anchorTarget.rect : null;
 
       // Fail-safe: If target element bounds are not yet rendered, center bubble on screen
       if (!rect || rect.width === 0 || rect.height === 0) {
-        if (bubble) {
-          bubble.style.top = '50%';
-          bubble.style.left = '50%';
-          bubble.style.transform = 'translate(-50%, -50%)';
-        }
-        if (ring) ring.style.display = 'none';
-        return;
+       if (bubble) {
+         bubble.style.top = '50%';
+         bubble.style.left = '50%';
+         bubble.style.transform = 'translate(-50%, -50%)';
+       }
+       return;
       }
 
-      if (ring) {
-        ring.style.display = 'block';
-        const pad = 8;
-        const viewportPad = 6;
-        const top = Math.max(viewportPad, rect.top - pad);
-        const left = Math.max(viewportPad, rect.left - pad);
-        const right = Math.min(window.innerWidth - viewportPad, rect.right + pad);
-        const bottom = Math.min(window.innerHeight - viewportPad, rect.bottom + pad);
-        ring.style.top = top + 'px';
-        ring.style.left = left + 'px';
-        ring.style.width = Math.max(20, right - left) + 'px';
-        ring.style.height = Math.max(20, bottom - top) + 'px';
+      if (ringLayer) {
+       targetRects.forEach(({ rect: targetRect }) => {
+         const ring = createTourHighlightRing();
+         const pad = 8;
+         const viewportPad = 6;
+         const top = Math.max(viewportPad, targetRect.top - pad);
+         const left = Math.max(viewportPad, targetRect.left - pad);
+         const right = Math.min(window.innerWidth - viewportPad, targetRect.right + pad);
+         const bottom = Math.min(window.innerHeight - viewportPad, targetRect.bottom + pad);
+         ring.style.top = top + 'px';
+         ring.style.left = left + 'px';
+         ring.style.width = Math.max(20, right - left) + 'px';
+         ring.style.height = Math.max(20, bottom - top) + 'px';
+         ringLayer.appendChild(ring);
+       });
       }
 
       const bRect = bubble.getBoundingClientRect();
@@ -6753,8 +6822,11 @@
 
     function endGuidedTour(isCompleted = false) {
       isTourActive = false;
+      closeAddMenu();
       clearTourFieldHighlights();
       tourDraftTabId = null;
+      const ringLayer = document.getElementById('tourHighlightRings');
+      if (ringLayer) ringLayer.innerHTML = '';
       const overlay = document.getElementById('tourOverlayContainer');
       if (overlay) overlay.classList.add('hidden');
       closeMergeTicketModal();
@@ -6807,6 +6879,9 @@
 
     function resetSimulationDataInternal() {
       isTourActive = false;
+      closeAddMenu();
+      const ringLayer = document.getElementById('tourHighlightRings');
+      if (ringLayer) ringLayer.innerHTML = '';
       const overlay = document.getElementById('tourOverlayContainer');
       if (overlay) overlay.classList.add('hidden');
       tickets = DEFAULT_TICKETS.map(t => ({ ...JSON.parse(JSON.stringify(t)), brand: getRandomBrand() }));
