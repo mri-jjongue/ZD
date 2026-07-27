@@ -6431,6 +6431,19 @@
       if (menu) menu.classList.remove('hidden');
     }
 
+    function showSearchOverlayForTour() {
+      const expandBox = document.getElementById('searchExpandBox');
+      const dropdownCard = document.getElementById('searchMenuDropdownCard');
+      if (expandBox) {
+        expandBox.classList.remove('hidden', 'scale-x-0', 'opacity-0');
+        expandBox.classList.add('scale-x-100', 'opacity-100');
+      }
+      if (dropdownCard) {
+        dropdownCard.classList.remove('hidden', '-translate-y-2', 'opacity-0');
+        dropdownCard.classList.add('translate-y-0', 'opacity-100');
+      }
+    }
+
     function selectAllTicketsForTour() {
       switchNav('views');
       const master = document.getElementById('viewsSelectAllTickets');
@@ -6508,7 +6521,7 @@
           description: "The search menu can filter results across tickets, articles, users, organisations, and side conversations.",
           targetId: "searchMenuDropdownCard",
           position: "bottom",
-          action: () => { closeSearchOverlay(); toggleSearchOverlay(); }
+          action: () => showSearchOverlayForTour()
         },
         {
           title: "Use search operators",
