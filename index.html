@@ -6917,6 +6917,8 @@
         offsetX: event.clientX - rect.left,
         offsetY: event.clientY - rect.top
       };
+      bubble.style.left = rect.left + 'px';
+      bubble.style.top = rect.top + 'px';
       bubble.style.transform = 'none';
       bubble.style.transition = 'none';
       event.currentTarget.setPointerCapture(event.pointerId);
@@ -6936,12 +6938,15 @@
       event.preventDefault();
     });
 
-    window.addEventListener('pointerup', (event) => {
+    function endTourBubbleDrag(event) {
       if (!tourBubbleDragState || event.pointerId !== tourBubbleDragState.pointerId) return;
       const bubble = document.getElementById('tourCalloutBubble');
       if (bubble) bubble.style.transition = '';
       tourBubbleDragState = null;
-    });
+    }
+
+    window.addEventListener('pointerup', endTourBubbleDrag);
+    window.addEventListener('pointercancel', endTourBubbleDrag);
 
     function nextTourStep() {
       if (currentTourStepIndex >= GUIDED_TOUR_STEPS.length - 1) {
