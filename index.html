@@ -6762,6 +6762,9 @@
       setTimeout(() => {
         positionTourHighlightAndBubble(stepData.targetId, stepData.position);
       }, 200);
+      setTimeout(() => {
+        positionTourHighlightAndBubble(stepData.targetId, stepData.position);
+      }, 400);
     }
 
     function positionTourHighlightAndBubble(targetId, posPref) {
@@ -6863,18 +6866,15 @@
       closeMergeTicketModal();
       closeConversationsDrawer();
       closeSearchOverlay();
+      closeAddMenu();
+      closeChatStatusMenu();
+      closeTicketMoreActionsMenu();
+      closeMacroMenu();
+      cancelBulkSelection();
+      const submitStatusMenu = document.getElementById('submitStatusMenu');
+      if (submitStatusMenu) submitStatusMenu.classList.add('hidden');
       switchNav('dashboard');
       showToast('Guided Orientation Complete!');
-    }
-
-    function onBrandSelectedInTour(brandName) {
-      if (isTourActive && brandName && brandName !== '-' && brandName !== 'Select brand') {
-        if (GUIDED_TOUR_STEPS[currentTourStepIndex] && GUIDED_TOUR_STEPS[currentTourStepIndex].step === 5) {
-          setTimeout(() => {
-            nextTourStep();
-          }, 300);
-        }
-      }
     }
 
     function openPhaseModal() {
