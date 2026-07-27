@@ -3326,15 +3326,22 @@
 
     let customersData = JSON.parse(JSON.stringify(DEFAULT_CUSTOMERS_DATA));
 
+    function syncInitialCustomerMessageAuthor(ticket, requester) {
+      const initialCustomerMessage = ticket.messages && ticket.messages.find(message => message.role === 'Customer');
+      if (initialCustomerMessage) initialCustomerMessage.author = requester;
+    }
+
     function assignRandomCustomersToTickets(ticketList, customerList) {
       return ticketList.map(ticket => {
         const customer = customerList[Math.floor(Math.random() * customerList.length)];
-        return {
+        const updatedTicket = {
           ...ticket,
           requester: customer.name,
           email: customer.email,
           avatar: getInitials(customer.name)
         };
+        syncInitialCustomerMessageAuthor(updatedTicket, customer.name);
+        return updatedTicket;
       });
     }
 
@@ -5567,16 +5574,9 @@
           activeTicket.email = '-';
           activeTicket.avatar = '-';
         }
+        syncInitialCustomerMessageAuthor(activeTicket, activeTicket.requester);
 
-        const toNameEl = document.getElementById('composerToName');
-        if (toNameEl) toNameEl.innerText = activeTicket.requester;
-
-        const userBigAvatar = document.getElementById('userBigAvatar');
-        const userNameDisplay = document.getElementById('userNameDisplay');
-        const userEmailDisplay = document.getElementById('userEmailDisplay');
-        if (userBigAvatar) userBigAvatar.innerText = activeTicket.avatar;
-        if (userNameDisplay) userNameDisplay.innerText = activeTicket.requester;
-        if (userEmailDisplay) userEmailDisplay.innerText = activeTicket.email;
+        renderTicketDetail(activeTicket.id);
 
         showToast(cust ? `Requester updated to ${cust.name}` : `Cleared requester`);
       }
