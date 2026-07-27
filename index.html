@@ -640,7 +640,7 @@
         <!-- DASHBOARD VIEW PANE -->
         <div id="pane-dashboard" class="w-full h-full flex overflow-hidden bg-slate-50/50">
           <!-- Center Main Box -->
-          <div class="flex-1 flex flex-col min-w-0 p-6 overflow-y-auto">
+          <div id="dashboardMainContent" class="flex-1 flex flex-col min-w-0 p-6 overflow-y-auto">
             <!-- Top Filter Header -->
             <div class="flex items-center justify-between mb-3 text-xs text-slate-500">
               <div id="dashTicketCountText" class="font-normal text-slate-600">0 tickets</div>
@@ -660,10 +660,14 @@
               </div>
             </div>
 
-            <!-- Empty State Container Box -->
-            <div class="flex-1 bg-white border border-slate-200 rounded-xl flex flex-col items-center justify-center p-8 text-center min-h-[420px] shadow-sm">
-              <!-- Line Art Sailor SVG Graphic -->
-              <div class="w-48 h-48 mb-3 flex items-center justify-center">
+            <!-- Assigned Tickets Container -->
+            <div class="flex-1 bg-white border border-slate-200 rounded-xl min-h-[420px] shadow-sm overflow-hidden">
+              <div id="dashboardTicketList" class="divide-y divide-slate-100"></div>
+
+              <!-- Empty State -->
+              <div id="dashboardEmptyState" class="hidden h-full min-h-[420px] flex flex-col items-center justify-center p-8 text-center">
+                <!-- Line Art Sailor SVG Graphic -->
+                <div class="w-48 h-48 mb-3 flex items-center justify-center">
                 <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full text-slate-300">
                   <!-- Sailor Hat -->
                   <path d="M70 75C70 60 130 60 130 75" stroke="#cbd5e1" stroke-width="3" stroke-linecap="round"/>
@@ -693,8 +697,9 @@
                 </svg>
               </div>
 
-              <h2 class="text-base font-bold text-slate-800">No tickets</h2>
-              <p class="text-xs text-slate-500 mt-1">Work you're assigned will appear here.</p>
+                <h2 class="text-base font-bold text-slate-800">No tickets</h2>
+                <p class="text-xs text-slate-500 mt-1">Work you're assigned will appear here.</p>
+              </div>
             </div>
           </div>
 
@@ -2693,12 +2698,13 @@
     
     <!-- Pulsing Highlight Ring -->
     <div id="tourHighlightRing" class="fixed border-4 border-[#1f73b7] rounded-xl pointer-events-none z-[999] tour-ring-active shadow-[0_0_25px_rgba(31,115,183,0.7)] transition-all duration-200"></div>
+    <div id="tourSecondaryHighlightRing" class="hidden fixed border-4 border-[#1f73b7] rounded-xl pointer-events-none z-[999] tour-ring-active shadow-[0_0_25px_rgba(31,115,183,0.7)] transition-all duration-200"></div>
     
     <!-- Floating Callout Context Bubble -->
     <div id="tourCalloutBubble" class="fixed w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 p-5 pointer-events-auto z-[1000] transition-all duration-200">
       
       <!-- Step Counter & Close -->
-      <div class="flex items-center justify-between mb-2">
+      <div class="flex items-center justify-between mb-2 cursor-move select-none" onpointerdown="startTourBubbleDrag(event)">
         <span id="tourStepCounter" class="text-[10px] font-bold text-[#1f73b7] bg-blue-50 px-2.5 py-0.5 rounded-full uppercase tracking-wider">Step 1 of 11</span>
         <button type="button" onclick="endGuidedTour()" title="Exit Guided Tour" class="text-slate-400 hover:text-slate-600 transition-colors p-1 cursor-pointer text-xs focus:outline-none">
           <i class="fa-solid fa-xmark"></i>
@@ -6277,9 +6283,23 @@
     // --- DASHBOARD RENDER ---
     function renderDashboard() {
       const list = document.getElementById('dashboardTicketList');
-      list.innerHTML = '';
+      const emptyState = document.getElementById('dashboardEmptyState');
+      const countEl = document.getElementById('dashTicketCountText');
+      if (!list) return;
 
-      tickets.slice(0, 4).forEach(t => {
+      list.innerHTML = '';
+      const assignedTickets = tickets.filter(t =>
+        (t.assignee === 'MRI Support' || t.assignee === 'Alex Rivera') && t.status !== 'Solved'
+      );
+
+      if (countEl) {
+        countEl.innerText = `${assignedTickets.length} ticket${assignedTickets.length === 1 ? '' : 's'}`;
+      }
+      if (emptyState) {
+        emptyState.classList.toggle('hidden', assignedTickets.length > 0);
+      }
+
+      assignedTickets.forEach(t => {
         const row = document.createElement('div');
         row.className = "p-3 hover:bg-slate-50 flex items-center justify-between cursor-pointer";
         row.onclick = () => { switchNav('views'); openTicket(t.id); };
@@ -6386,6 +6406,8 @@
     let currentTourStepIndex = 0;
     let isTourActive = false;
     let GUIDED_TOUR_STEPS = [];
+    let tourBubbleDragState = null;
+    let tourBubbleWasDragged = false;
 
     function selectPhaseChoice(phaseNum) {
       if (phaseNum !== 1 && phaseNum !== 3) return;
@@ -6467,8 +6489,9 @@
           title: "Home and dashboard",
           description: "The Home dashboard summarises your workload, recent ticket activity, queue metrics, and agent status at a glance.",
           alert: "Start here to understand what needs your attention before opening a queue.",
-          targetId: "homeDrawer",
-          position: "right",
+          targetId: "dashboardMainContent",
+          additionalTargetIds: ["nav-dashboard"],
+          centerBubble: true,
           action: () => switchNav('dashboard')
         },
         {
@@ -6726,6 +6749,7 @@
         return;
       }
       currentTourStepIndex = index;
+      tourBubbleWasDragged = false;
       const stepData = GUIDED_TOUR_STEPS[index];
 
       // Execute step action
@@ -6768,27 +6792,43 @@
       }
 
       // Position highlight ring & bubble immediately & on settling ticks
-      positionTourHighlightAndBubble(stepData.targetId, stepData.position);
+      positionTourHighlightAndBubble(stepData.targetId, stepData.position, stepData.additionalTargetIds, stepData.centerBubble);
       setTimeout(() => {
-        positionTourHighlightAndBubble(stepData.targetId, stepData.position);
+        positionTourHighlightAndBubble(stepData.targetId, stepData.position, stepData.additionalTargetIds, stepData.centerBubble);
       }, 50);
       setTimeout(() => {
-        positionTourHighlightAndBubble(stepData.targetId, stepData.position);
+        positionTourHighlightAndBubble(stepData.targetId, stepData.position, stepData.additionalTargetIds, stepData.centerBubble);
       }, 200);
       setTimeout(() => {
-        positionTourHighlightAndBubble(stepData.targetId, stepData.position);
+        positionTourHighlightAndBubble(stepData.targetId, stepData.position, stepData.additionalTargetIds, stepData.centerBubble);
       }, 400);
     }
 
-    function positionTourHighlightAndBubble(targetId, posPref) {
+    function positionTourHighlightAndBubble(targetId, posPref, additionalTargetIds = [], centerBubble = false) {
       const targetEl = targetId ? document.getElementById(targetId) : null;
       const ring = document.getElementById('tourHighlightRing');
+      const secondaryRing = document.getElementById('tourSecondaryHighlightRing');
       const bubble = document.getElementById('tourCalloutBubble');
 
       if (!bubble) return;
 
+      if (secondaryRing) {
+        const secondaryTarget = additionalTargetIds.length ? document.getElementById(additionalTargetIds[0]) : null;
+        if (secondaryTarget) {
+          const secondaryRect = secondaryTarget.getBoundingClientRect();
+          const pad = 6;
+          secondaryRing.classList.remove('hidden');
+          secondaryRing.style.top = Math.max(0, secondaryRect.top - pad) + 'px';
+          secondaryRing.style.left = Math.max(0, secondaryRect.left - pad) + 'px';
+          secondaryRing.style.width = Math.max(20, secondaryRect.width + pad * 2) + 'px';
+          secondaryRing.style.height = Math.max(20, secondaryRect.height + pad * 2) + 'px';
+        } else {
+          secondaryRing.classList.add('hidden');
+        }
+      }
+
       if (!targetEl) {
-        if (bubble) {
+        if (!tourBubbleWasDragged) {
           bubble.style.top = '50%';
           bubble.style.left = '50%';
           bubble.style.transform = 'translate(-50%, -50%)';
@@ -6807,7 +6847,7 @@
 
       // Fail-safe: If target element bounds are not yet rendered, center bubble on screen
       if (!rect || rect.width === 0 || rect.height === 0) {
-        if (bubble) {
+        if (!tourBubbleWasDragged) {
           bubble.style.top = '50%';
           bubble.style.left = '50%';
           bubble.style.transform = 'translate(-50%, -50%)';
@@ -6823,6 +6863,15 @@
         ring.style.left = Math.max(0, rect.left - pad) + 'px';
         ring.style.width = Math.max(20, rect.width + pad * 2) + 'px';
         ring.style.height = Math.max(20, rect.height + pad * 2) + 'px';
+      }
+
+      if (tourBubbleWasDragged) return;
+
+      if (centerBubble) {
+        bubble.style.top = '50%';
+        bubble.style.left = '50%';
+        bubble.style.transform = 'translate(-50%, -50%)';
+        return;
       }
 
       const bRect = bubble.getBoundingClientRect();
@@ -6857,6 +6906,47 @@
       bubble.style.left = left + 'px';
       bubble.style.transform = 'none';
     }
+
+    function startTourBubbleDrag(event) {
+      if (event.target.closest('button')) return;
+      const bubble = document.getElementById('tourCalloutBubble');
+      if (!bubble) return;
+      const rect = bubble.getBoundingClientRect();
+      tourBubbleDragState = {
+        pointerId: event.pointerId,
+        offsetX: event.clientX - rect.left,
+        offsetY: event.clientY - rect.top
+      };
+      bubble.style.left = rect.left + 'px';
+      bubble.style.top = rect.top + 'px';
+      bubble.style.transform = 'none';
+      bubble.style.transition = 'none';
+      event.currentTarget.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    }
+
+    window.addEventListener('pointermove', (event) => {
+      if (!tourBubbleDragState || event.pointerId !== tourBubbleDragState.pointerId) return;
+      const bubble = document.getElementById('tourCalloutBubble');
+      if (!bubble) return;
+      tourBubbleWasDragged = true;
+      const margin = 16;
+      const left = Math.max(margin, Math.min(event.clientX - tourBubbleDragState.offsetX, window.innerWidth - bubble.offsetWidth - margin));
+      const top = Math.max(margin, Math.min(event.clientY - tourBubbleDragState.offsetY, window.innerHeight - bubble.offsetHeight - margin));
+      bubble.style.left = left + 'px';
+      bubble.style.top = top + 'px';
+      event.preventDefault();
+    });
+
+    function endTourBubbleDrag(event) {
+      if (!tourBubbleDragState || event.pointerId !== tourBubbleDragState.pointerId) return;
+      const bubble = document.getElementById('tourCalloutBubble');
+      if (bubble) bubble.style.transition = '';
+      tourBubbleDragState = null;
+    }
+
+    window.addEventListener('pointerup', endTourBubbleDrag);
+    window.addEventListener('pointercancel', endTourBubbleDrag);
 
     function nextTourStep() {
       if (currentTourStepIndex >= GUIDED_TOUR_STEPS.length - 1) {
