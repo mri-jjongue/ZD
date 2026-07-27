@@ -6130,22 +6130,35 @@
 
       assignedTickets.forEach(t => {
         const row = document.createElement('div');
-        row.className = "p-3 hover:bg-slate-50 flex items-center justify-between cursor-pointer";
+        row.className = "px-4 py-3 hover:bg-slate-50 cursor-pointer";
         row.onclick = () => { switchNav('views'); openTicket(t.id); };
 
-        let badgeClass = "zd-badge-open";
-        if (t.status === "New") badgeClass = "zd-badge-new";
-        if (t.status === "Pending") badgeClass = "zd-badge-pending";
+        let statusColor = "bg-[#c72a1c]";
+        if (t.status === "New") statusColor = "bg-[#e09000]";
+        if (t.status === "Pending") statusColor = "bg-[#1f73b7]";
+        if (t.status === "Hold") statusColor = "bg-[#49545c]";
+        const latestMessage = t.messages?.[t.messages.length - 1]?.text || t.summary || '';
 
         row.innerHTML = `
-          <div class="flex items-center space-x-3">
-            <span class="zd-badge ${badgeClass}">${t.status}</span>
-            <span class="font-mono text-zdTextMuted">#${t.id}</span>
-            <span class="font-bold text-zdNavy truncate max-w-sm">${escapeHtml(t.subject)}</span>
-          </div>
-          <div class="flex items-center space-x-4 text-zdTextMuted text-[11px]">
-            <span>${escapeHtml(t.requester)}</span>
-            <span class="font-semibold text-zdTextDark">${t.priority}</span>
+          <div class="flex items-start gap-3 min-w-0">
+            <div class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#d8eeee] text-[10px] font-semibold text-[#17494d]">
+              ${escapeHtml(t.avatar)}
+            </div>
+            <div class="min-w-0 flex-1 text-[11px] leading-[1.35] text-[#2f3941]">
+              <div class="truncate text-xs font-semibold">
+                ${escapeHtml(t.requester)} <span class="font-normal text-slate-400">|</span> ${escapeHtml(t.subject)}
+              </div>
+              <div class="mt-1 flex min-w-0 items-center gap-1.5">
+                <span class="h-2.5 w-2.5 shrink-0 rounded-[1px] ${statusColor}" aria-hidden="true"></span>
+                <span class="shrink-0">${escapeHtml(t.status)}</span>
+                <span class="shrink-0 text-slate-300">•</span>
+                <span class="shrink-0">Request #${t.id}</span>
+                <span class="truncate text-slate-600">${escapeHtml(latestMessage)}</span>
+              </div>
+              <div class="mt-1 text-[10px] text-slate-500">
+                ${escapeHtml(t.requested)} <span class="mx-1 text-slate-300">|</span> #${t.id}
+              </div>
+            </div>
           </div>
         `;
         list.appendChild(row);
