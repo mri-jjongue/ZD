@@ -3326,6 +3326,20 @@
 
     let customersData = JSON.parse(JSON.stringify(DEFAULT_CUSTOMERS_DATA));
 
+    function assignRandomCustomersToTickets(ticketList, customerList) {
+      return ticketList.map(ticket => {
+        const customer = customerList[Math.floor(Math.random() * customerList.length)];
+        return {
+          ...ticket,
+          requester: customer.name,
+          email: customer.email,
+          avatar: getInitials(customer.name)
+        };
+      });
+    }
+
+    tickets = assignRandomCustomersToTickets(tickets, customersData);
+
     function renderCustomersTable(filterQuery = '') {
       const tbody = document.getElementById('customerTableBody');
       const countEl = document.getElementById('customerCountDisplay');
@@ -6242,8 +6256,11 @@
     }
 
     function resetSimulationData() {
-      tickets = DEFAULT_TICKETS.map(t => ({ ...JSON.parse(JSON.stringify(t)), brand: getRandomBrand() }));
       customersData = JSON.parse(JSON.stringify(DEFAULT_CUSTOMERS_DATA));
+      tickets = assignRandomCustomersToTickets(
+        DEFAULT_TICKETS.map(t => ({ ...JSON.parse(JSON.stringify(t)), brand: getRandomBrand() })),
+        customersData
+      );
       organisationsData = JSON.parse(JSON.stringify(DEFAULT_ORGANISATIONS_DATA));
       draftTickets = {};
       nextDraftNum = 1;
