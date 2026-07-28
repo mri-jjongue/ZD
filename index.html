@@ -830,14 +830,6 @@
               </tbody>
             </table>
           </div>
-          <div id="customerBulkActionBar" class="hidden absolute bottom-0 left-0 right-0 border-t border-slate-200 bg-white px-8 py-3 shadow-[0_-4px_12px_rgba(15,23,42,0.08)] z-30 flex items-center justify-between">
-            <div class="flex items-center space-x-6 text-xs">
-              <span id="customerSelectedCount" class="text-slate-700">0 selected</span>
-              <button type="button" onclick="deleteSelectedCustomers()" class="text-rose-600 hover:underline">Delete</button>
-            </div>
-            <button type="button" onclick="clearCustomerSelection()" class="text-xs text-[#1f73b7] hover:underline">Clear selection</button>
-          </div>
-
           <!-- BULK ACTION BAR (Sliding up from bottom when tickets checked) -->
           <div id="viewsBulkActionBar" class="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-xl px-6 py-3.5 flex items-center justify-between z-30 transition-transform duration-300 transform translate-y-full">
             <!-- Left Options: Count + Edit + Merge + Mark as spam + Delete -->
@@ -2354,6 +2346,13 @@
                 </tbody>
               </table>
             </div>
+            <div id="customerBulkActionBar" class="hidden absolute bottom-0 left-0 right-0 border-t border-slate-200 bg-white px-8 py-3 shadow-[0_-4px_12px_rgba(15,23,42,0.08)] z-30 flex items-center justify-between">
+              <div class="flex items-center space-x-6 text-xs">
+                <span id="customerSelectedCount" class="text-slate-700">0 selected</span>
+                <button type="button" onclick="deleteSelectedCustomers()" class="text-rose-600 hover:underline">Delete</button>
+              </div>
+              <button type="button" onclick="clearCustomerSelection()" class="text-xs text-[#1f73b7] hover:underline">Clear selection</button>
+            </div>
           </div>
         </div>
 
@@ -3599,11 +3598,6 @@
       closeAddOrgModal();
       renderOrganisationsTable();
       showToast(`Added organisation "${name}"`);
-    }
-
-    function toggleSelectAllOrgs(master) {
-      const checkboxes = document.querySelectorAll('.org-row-checkbox');
-      checkboxes.forEach(cb => cb.checked = master.checked);
     }
 
     function switchCustomerTab(tabKey) {
