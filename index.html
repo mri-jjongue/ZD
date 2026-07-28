@@ -2344,17 +2344,6 @@
 
         <!-- ORGANISATIONS DIRECTORY PANE (Matching Screenshot 2) -->
         <div id="pane-organisations" class="hidden flex-1 flex h-full overflow-hidden bg-white">
-          <!-- Left Organisation Lists Sidebar Drawer -->
-          <aside class="w-64 bg-white border-r border-slate-200 p-4 text-xs shrink-0 flex flex-col justify-between">
-            <div class="space-y-3">
-              <h3 class="font-bold text-slate-700 text-xs px-2 mb-2">Organisation lists</h3>
-              
-              <div onclick="switchOrgTab('all')" id="org-tab-all" class="bg-[#e9f2fa] text-[#1f73b7] font-semibold px-3 py-2 rounded-lg flex items-center justify-between cursor-pointer">
-                <span>All organisations</span>
-              </div>
-            </div>
-          </aside>
-
           <!-- Right Main Organisations Workspace -->
           <div class="flex-1 flex flex-col h-full overflow-hidden p-8 bg-white overflow-y-auto">
             <!-- Header Row -->
@@ -2397,7 +2386,6 @@
               <table class="w-full text-left text-xs whitespace-nowrap">
                 <thead class="bg-white border-b border-slate-200 text-slate-700 text-xs font-semibold sticky top-0 z-10">
                   <tr>
-                    <th class="py-3 px-3 w-8"><input type="checkbox" onclick="toggleSelectAllOrgs(this)" class="w-4 h-4 rounded border-slate-300 text-[#1f73b7] focus:ring-0 cursor-pointer"></th>
                     <th class="py-3 px-3 cursor-pointer hover:text-slate-900">Name <i class="fa-solid fa-arrows-up-down text-[9px] text-slate-400 ml-0.5"></i></th>
                     <th class="py-3 px-3">Domain</th>
                     <th class="py-3 px-3">Tags</th>
@@ -3490,7 +3478,6 @@
         const tagPills = o.tags.map(t => `<span class="bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-medium px-1.5 py-0.5 rounded mr-1">${escapeHtml(t)}</span>`).join('');
 
         tr.innerHTML = `
-          <td class="py-3 px-3 w-8" onclick="event.stopPropagation()"><input type="checkbox" class="org-row-checkbox w-4 h-4 rounded border-slate-300 text-[#1f73b7] focus:ring-0 cursor-pointer"></td>
           <td class="py-3 px-3 font-normal text-slate-800 flex items-center space-x-2">
             <a href="#" onclick="event.preventDefault(); showToast('Viewing organisation profile for ${escapeHtml(o.name)}');" class="text-[#1f73b7] hover:underline font-normal text-xs">
               ${escapeHtml(o.name)}
@@ -3550,11 +3537,6 @@
       closeAddOrgModal();
       renderOrganisationsTable();
       showToast(`Added organisation "${name}"`);
-    }
-
-    function toggleSelectAllOrgs(master) {
-      const checkboxes = document.querySelectorAll('.org-row-checkbox');
-      checkboxes.forEach(cb => cb.checked = master.checked);
     }
 
     function switchCustomerTab(tabKey) {
