@@ -327,6 +327,9 @@
           <i class="fa-solid fa-building text-xs"></i>
         </button>
 
+        <!-- Separator -->
+        <div class="w-6 border-t border-slate-300/70 mx-auto"></div>
+
         <!-- Analytics / Explore -->
         <button id="nav-reports" onclick="switchNav('reports')" title="Reporting & Analytics" class="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-200/60 rounded-lg transition-all">
           <i class="fa-solid fa-chart-column text-xs"></i>
@@ -2268,7 +2271,7 @@
         </div>
 
         <!-- CUSTOMERS DIRECTORY PANE (Matching User Screenshot) -->
-        <div id="pane-customers" class="hidden flex-1 flex h-full overflow-hidden bg-white">
+        <div id="pane-customers" class="hidden flex-1 flex h-full overflow-hidden bg-white relative">
           <!-- Left Customer Lists Sidebar Drawer -->
           <aside class="w-64 bg-white border-r border-slate-200 p-4 text-xs shrink-0 flex flex-col justify-between">
             <div class="space-y-3">
@@ -2338,6 +2341,72 @@
                   <!-- Dynamic Customer Rows -->
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          <!-- CUSTOMER PROFILE OVERLAY (shown over pane-customers) -->
+          <div id="pane-customer-profile" class="hidden absolute inset-0 z-30 bg-white flex flex-col overflow-hidden">
+            <!-- Top Header -->
+            <div class="flex items-center justify-between px-8 pt-5 pb-0 border-b border-slate-200">
+              <div class="flex items-center space-x-3">
+                <button onclick="closeCustomerProfile()" class="text-slate-400 hover:text-slate-700 transition-colors mr-1 cursor-pointer" title="Back to customers">
+                  <i class="fa-solid fa-arrow-left text-sm"></i>
+                </button>
+                <div class="w-10 h-10 rounded-full bg-slate-500 flex items-center justify-center text-white shrink-0">
+                  <i class="fa-solid fa-user text-base"></i>
+                </div>
+                <span id="cp-name" class="text-base font-semibold text-slate-800"></span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <button onclick="showToast('New ticket for customer')" class="flex items-center border border-slate-300 rounded-md text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer overflow-hidden shadow-xs">
+                  <span class="px-3 py-1.5 border-r border-slate-300">+ New ticket</span>
+                  <span class="px-2 py-1.5"><i class="fa-solid fa-chevron-down text-[10px]"></i></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Profile Tabs -->
+            <div class="flex items-center space-x-6 px-8 border-b border-slate-200 bg-white">
+              <button class="text-xs font-semibold text-[#1f73b7] border-b-2 border-[#1f73b7] py-3 cursor-pointer">Tickets (<span id="cp-ticket-count">0</span>)</button>
+              <button onclick="showToast('Help centre')" class="text-xs font-medium text-slate-500 hover:text-slate-700 py-3 cursor-pointer border-b-2 border-transparent">Help centre (1)</button>
+              <button onclick="showToast('Related')" class="text-xs font-medium text-slate-500 hover:text-slate-700 py-3 cursor-pointer border-b-2 border-transparent">Related</button>
+              <button onclick="showToast('Security settings')" class="text-xs font-medium text-slate-500 hover:text-slate-700 py-3 cursor-pointer border-b-2 border-transparent">Security settings</button>
+            </div>
+
+            <!-- Ticket List Area -->
+            <div class="flex-1 overflow-y-auto p-8 bg-white">
+              <!-- Sub-header row -->
+              <div class="flex items-center justify-between mb-4">
+                <button onclick="showToast('Filter requested tickets')" class="flex items-center space-x-1 border border-slate-300 rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer shadow-xs">
+                  <span>Requested tickets (<span id="cp-req-count">0</span>)</span>
+                  <i class="fa-solid fa-chevron-down text-[10px] ml-1"></i>
+                </button>
+                <button onclick="showToast('Filter customer tickets')" class="flex items-center space-x-1 border border-slate-300 rounded-md px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 cursor-pointer shadow-xs">
+                  <i class="fa-solid fa-sliders text-[10px]"></i>
+                  <span class="ml-1">Filter</span>
+                </button>
+              </div>
+              <div class="text-xs text-slate-500 mb-3"><span id="cp-total-label">0 tickets</span></div>
+
+              <!-- Tickets Table -->
+              <div class="border-t border-slate-200">
+                <table class="w-full text-left text-xs whitespace-nowrap">
+                  <thead class="bg-white border-b border-slate-200 text-slate-700 text-xs font-semibold sticky top-0 z-10">
+                    <tr>
+                      <th class="py-3 px-3 w-8"><input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-[#1f73b7] focus:ring-0 cursor-pointer"></th>
+                      <th class="py-3 px-3">Ticket status</th>
+                      <th class="py-3 px-3 cursor-pointer hover:text-slate-900">ID <i class="fa-solid fa-arrows-up-down text-[9px] text-slate-400 ml-0.5"></i></th>
+                      <th class="py-3 px-3">Subject</th>
+                      <th class="py-3 px-3 cursor-pointer hover:text-slate-900">Requested <i class="fa-solid fa-arrows-up-down text-[9px] text-slate-400 ml-0.5"></i></th>
+                      <th class="py-3 px-3 cursor-pointer hover:text-slate-900">Updated <i class="fa-solid fa-arrows-up-down text-[9px] text-slate-400 ml-0.5"></i></th>
+                      <th class="py-3 px-3">Group</th>
+                      <th class="py-3 px-3">Assignee</th>
+                    </tr>
+                  </thead>
+                  <tbody id="cp-ticket-tbody" class="divide-y divide-slate-100 text-xs">
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -3119,7 +3188,7 @@
         if (pDash) pDash.classList.add('hidden');
         if (pViews) pViews.classList.add('hidden');
         if (pDetail) pDetail.classList.add('hidden');
-        if (pCust) pCust.classList.add('hidden');
+        if (pCust) { pCust.classList.add('hidden'); closeCustomerProfile(); }
         if (pOrg) pOrg.classList.add('hidden');
         if (pRep) pRep.classList.add('hidden');
         if (pSearch) pSearch.classList.remove('hidden');
@@ -3134,7 +3203,7 @@
       if (pDash) pDash.classList.add('hidden');
       if (pViews) pViews.classList.add('hidden');
       if (pDetail) pDetail.classList.add('hidden');
-      if (pCust) pCust.classList.add('hidden');
+      if (pCust) { pCust.classList.add('hidden'); closeCustomerProfile(); }
       if (pOrg) pOrg.classList.add('hidden');
 
       if (tabId === 'dashboard') {
@@ -3357,6 +3426,7 @@
       filtered.forEach(c => {
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50/80 cursor-pointer transition-colors";
+        tr.onclick = () => openCustomerProfile(c.id);
         
         const tagPills = c.tags.map(t => `<span class="bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-medium px-1.5 py-0.5 rounded mr-1">${escapeHtml(t)}</span>`).join('');
 
@@ -3366,7 +3436,7 @@
             <div class="w-5 h-5 rounded-full bg-slate-500 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
               <i class="fa-solid fa-user text-[9px]"></i>
             </div>
-            <a href="#" onclick="event.preventDefault(); showToast('Viewing customer profile for ${escapeHtml(c.name)}');" class="text-[#1f73b7] hover:underline font-normal text-xs">
+            <a href="#" onclick="event.preventDefault(); event.stopPropagation(); openCustomerProfile(${c.id});" class="text-[#1f73b7] hover:underline font-normal text-xs">
               ${escapeHtml(c.name)}
             </a>
           </td>
@@ -3374,7 +3444,7 @@
           <td class="py-3 px-3">${tagPills}</td>
           <td class="py-3 px-3 text-slate-500 font-normal">${escapeHtml(c.timezone)}</td>
           <td class="py-3 px-3 text-slate-500 font-normal">${escapeHtml(c.updated)}</td>
-          <td class="py-3 px-3 w-8 text-right"><i class="fa-solid fa-ellipsis-vertical text-slate-400 hover:text-slate-700 cursor-pointer" onclick="showToast('Customer actions for ${escapeHtml(c.name)}')"></i></td>
+          <td class="py-3 px-3 w-8 text-right"><i class="fa-solid fa-ellipsis-vertical text-slate-400 hover:text-slate-700 cursor-pointer" onclick="event.stopPropagation(); showToast('Customer actions for ${escapeHtml(c.name)}')"></i></td>
         `;
 
         tbody.appendChild(tr);
@@ -3430,6 +3500,65 @@
     function toggleSelectAllCustomers(master) {
       const checkboxes = document.querySelectorAll('.customer-row-checkbox');
       checkboxes.forEach(cb => cb.checked = master.checked);
+    }
+
+    function openCustomerProfile(customerId) {
+      const customer = customersData.find(c => c.id === customerId);
+      if (!customer) return;
+
+      const customerTickets = tickets.filter(t => t.email === customer.email || t.requester === customer.name);
+      const count = customerTickets.length;
+
+      const nameEl = document.getElementById('cp-name');
+      const countEl = document.getElementById('cp-ticket-count');
+      const reqCountEl = document.getElementById('cp-req-count');
+      const totalLabelEl = document.getElementById('cp-total-label');
+      const tbody = document.getElementById('cp-ticket-tbody');
+
+      if (nameEl) nameEl.textContent = customer.name;
+      if (countEl) countEl.textContent = count;
+      if (reqCountEl) reqCountEl.textContent = count;
+      if (totalLabelEl) totalLabelEl.textContent = count + (count === 1 ? ' ticket' : ' tickets');
+
+      if (tbody) {
+        tbody.innerHTML = '';
+        if (count === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400 text-xs">No tickets found for this customer.</td></tr>`;
+        } else {
+          const statusColors = {
+            'Open': 'bg-[#e9f2fa] text-[#1f73b7]',
+            'Pending': 'bg-amber-50 text-amber-700',
+            'On-hold': 'bg-orange-50 text-orange-700',
+            'Solved': 'bg-green-50 text-green-700',
+            'Closed': 'bg-slate-100 text-slate-600'
+          };
+          customerTickets.forEach(t => {
+            const statusClass = statusColors[t.status] || 'bg-slate-100 text-slate-600';
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-slate-50/80 cursor-pointer transition-colors';
+            tr.innerHTML = `
+              <td class="py-3 px-3 w-8" onclick="event.stopPropagation()"><input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-[#1f73b7] focus:ring-0 cursor-pointer"></td>
+              <td class="py-3 px-3"><span class="inline-block px-2 py-0.5 rounded text-[10px] font-semibold ${statusClass}">${escapeHtml(t.status)}</span></td>
+              <td class="py-3 px-3 text-slate-600 font-normal">#${t.id}</td>
+              <td class="py-3 px-3 text-slate-800 font-normal max-w-xs truncate">${escapeHtml(t.subject)}</td>
+              <td class="py-3 px-3 text-slate-500 font-normal">${escapeHtml(t.requested)}</td>
+              <td class="py-3 px-3 text-slate-500 font-normal">${escapeHtml(t.updated)}</td>
+              <td class="py-3 px-3 text-slate-500 font-normal">${escapeHtml(t.assignee || '-')}</td>
+              <td class="py-3 px-3 text-slate-500 font-normal">${escapeHtml(t.assignee || '-')}</td>
+            `;
+            tr.onclick = () => openTicket(t.id);
+            tbody.appendChild(tr);
+          });
+        }
+      }
+
+      const overlay = document.getElementById('pane-customer-profile');
+      if (overlay) overlay.classList.remove('hidden');
+    }
+
+    function closeCustomerProfile() {
+      const overlay = document.getElementById('pane-customer-profile');
+      if (overlay) overlay.classList.add('hidden');
     }
 
     // --- ORGANISATIONS DIRECTORY LOGIC & DATA ---
