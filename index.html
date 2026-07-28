@@ -6137,6 +6137,7 @@
 
     function renderKbArticles(filter = '') {
       const container = document.getElementById('kbResultsList');
+      if (!container) return;
       container.innerHTML = '';
 
       const matches = KB_ARTICLES.filter(a => 
