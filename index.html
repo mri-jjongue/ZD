@@ -3153,6 +3153,7 @@
         if (homeDrawer) homeDrawer.classList.remove('hidden');
         if (viewsDrawer) viewsDrawer.classList.add('hidden');
         if (pDash) pDash.classList.remove('hidden');
+        renderDashboard();
       } else if (tabId === 'views') {
         if (homeDrawer) homeDrawer.classList.add('hidden');
         if (viewsDrawer) viewsDrawer.classList.remove('hidden');
@@ -3619,9 +3620,14 @@
       renderQueueView();
     }
 
+    function isAssignedToCurrentAgent(ticket) {
+      const assignee = (ticket.assignee || '').trim();
+      return (assignee === 'MRI Support' || assignee === 'MRI Support (You)' || assignee === 'Alex Rivera') && ticket.status !== 'Solved';
+    }
+
     function getFilteredTickets() {
       if (currentQueue === 'my-tickets' || currentQueue === 'my-open') {
-        return tickets.filter(t => (t.assignee === 'MRI Support' || t.assignee === 'Alex Rivera') && t.status !== 'Solved');
+        return tickets.filter(isAssignedToCurrentAgent);
       } else if (currentQueue === 'unassigned') {
         return tickets.filter(t => t.assignee === 'Unassigned');
       } else if (currentQueue === 'pending') {
@@ -4776,7 +4782,7 @@
     }
 
     function updateQueueCounters() {
-      const myTickets = tickets.filter(t => (t.assignee === 'MRI Support' || t.assignee === 'Alex Rivera') && t.status !== 'Solved').length;
+      const myTickets = tickets.filter(isAssignedToCurrentAgent).length;
       const unassigned = tickets.filter(t => t.assignee === 'Unassigned' && t.status !== 'Solved').length;
       const pending = tickets.filter(t => t.status === 'Pending').length;
       const allTickets = tickets.filter(t => t.status !== 'Solved').length;
@@ -5468,6 +5474,7 @@
         ticket[field] = value;
         showToast(`Updated ${field} to ${value}`);
         updateQueueCounters();
+        renderDashboard();
       }
     }
 
@@ -5817,6 +5824,7 @@
         renderTabs();
         renderTicketDetail(realId);
         updateQueueCounters();
+        renderDashboard();
 
         showToast(`Created ticket #${realId} with status ${targetStatus}`);
       } else {
@@ -5840,6 +5848,7 @@
 
         renderTicketDetail(ticket.id);
         updateQueueCounters();
+        renderDashboard();
 
         showToast(`Submitted changes and set ticket status to ${targetStatus}`);
       }
@@ -6131,9 +6140,7 @@
       if (!list) return;
 
       list.innerHTML = '';
-      const assignedTickets = tickets.filter(t =>
-        (t.assignee === 'MRI Support' || t.assignee === 'Alex Rivera') && t.status !== 'Solved'
-      );
+      const assignedTickets = tickets.filter(isAssignedToCurrentAgent);
 
       if (countEl) {
         countEl.innerText = `${assignedTickets.length} ticket${assignedTickets.length === 1 ? '' : 's'}`;
