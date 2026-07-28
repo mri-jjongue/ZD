@@ -95,6 +95,36 @@
       border-color: #FFE082 !important;
     }
 
+    .composer-editor {
+      min-height: 110px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .composer-editor[data-empty="true"]::before {
+      content: attr(data-placeholder);
+      color: #94a3b8;
+      pointer-events: none;
+    }
+    .composer-mention {
+      display: inline;
+      background: #FEF3C7;
+      color: #854D0E;
+      border-radius: 4px;
+      padding: 0 2px;
+      font-weight: 600;
+    }
+    .mention-picker {
+      transform: translateY(16px);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+    .mention-picker.is-open {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
     /* Pulse notification dot */
     .pulse-online {
       box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
@@ -1006,10 +1036,10 @@
                   <div class="relative">
                     <select id="fieldAssignee" onchange="updateTicketField('assignee', this.value)" class="w-full p-2 pr-8 bg-white border border-slate-200 rounded-lg font-normal text-slate-700 focus:outline-none focus:border-[#1f73b7] shadow-sm appearance-none cursor-pointer">
                       <option value="-">-</option>
-                      <option value="MRI Support">MRI Support (You)</option>
-                      <option value="Alex Rivera">Alex Rivera</option>
-                      <option value="Sarah Jenkins">Sarah Jenkins</option>
-                      <option value="Marcus Vance">Marcus Vance (Tier 2)</option>
+                      <option value="MRI Support" data-agent-full-name="Joe Jongue" data-agent-email="joe.jongue@mrisoftware.com">MRI Support (You)</option>
+                      <option value="Alex Rivera" data-agent-full-name="Alex Rivera" data-agent-email="alex.rivera@mrisoftware.com">Alex Rivera</option>
+                      <option value="Sarah Jenkins" data-agent-full-name="Sarah Jenkins" data-agent-email="sarah.jenkins@mrisoftware.com">Sarah Jenkins</option>
+                      <option value="Marcus Vance" data-agent-full-name="Marcus Vance" data-agent-email="marcus.vance@mrisoftware.com">Marcus Vance (Tier 2)</option>
                     </select>
                     <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
                   </div>
@@ -2237,18 +2267,24 @@
                   </div>
 
                   <!-- Textarea Container Box (Encapsulating Textarea + Formatting Icons inside, per Mockup) -->
-                  <div class="border border-slate-200 rounded-lg p-3 bg-white focus-within:border-[#1f73b7] transition-all shadow-2xs">
-                    <textarea id="composerTextarea" oninput="saveCurrentComposerState()" rows="5" placeholder="Type your response here..." class="w-full text-xs bg-transparent focus:outline-none resize-none font-sans min-h-[110px] text-slate-700 placeholder:text-slate-400"></textarea>
+                  <div class="relative">
+                    <div class="border border-slate-200 rounded-lg p-3 bg-white focus-within:border-[#1f73b7] transition-all shadow-2xs">
+                      <div id="composerTextarea" contenteditable="true" spellcheck="true" data-placeholder="Type your response here..." data-empty="true" oninput="handleComposerInput(event)" onkeydown="handleComposerKeydown(event)" onkeyup="handleComposerKeyup(event)" class="composer-editor w-full text-xs bg-transparent focus:outline-none font-sans text-slate-700 select-text"></div>
+                      
+                      <!-- Formatting Toolbar Inside Textarea Box (Bottom Left, per Mockup) -->
+                      <div class="flex items-center space-x-3 text-slate-400 text-xs pt-2 border-t border-slate-100 mt-1">
+                        <button title="Eraser/Undo" onclick="insertFormatting('**')" class="hover:text-slate-700 p-0.5"><i class="fa-solid fa-eraser text-xs"></i></button>
+                        <button title="Bold text" onclick="insertFormatting('**')" class="hover:text-slate-700 p-0.5 font-bold">T</button>
+                        <button title="Emoji" onclick="showToast('Emoji picker')" class="hover:text-slate-700 p-0.5"><i class="fa-regular fa-face-smile text-xs"></i></button>
+                        <button title="Attachment" onclick="showToast('Attachment dialog')" class="hover:text-slate-700 p-0.5"><i class="fa-solid fa-paperclip text-xs"></i></button>
+                        <button title="Link" onclick="showToast('Insert link')" class="hover:text-slate-700 p-0.5"><i class="fa-solid fa-link text-xs"></i></button>
+                        <button title="Code block" onclick="insertFormatting('```')" class="hover:text-slate-700 p-0.5"><i class="fa-solid fa-pen-ruler text-xs"></i></button>
+                        <button title="Table" onclick="showToast('Insert table')" class="hover:text-slate-700 p-0.5"><i class="fa-solid fa-table-cells text-xs"></i></button>
+                      </div>
+                    </div>
                     
-                    <!-- Formatting Toolbar Inside Textarea Box (Bottom Left, per Mockup) -->
-                    <div class="flex items-center space-x-3 text-slate-400 text-xs pt-2 border-t border-slate-100 mt-1">
-                      <button title="Eraser/Undo" onclick="insertFormatting('**')" class="hover:text-slate-700 p-0.5"><i class="fa-solid fa-eraser text-xs"></i></button>
-                      <button title="Bold text" onclick="insertFormatting('**')" class="hover:text-slate-700 p-0.5 font-bold">T</button>
-                      <button title="Emoji" onclick="showToast('Emoji picker')" class="hover:text-slate-700 p-0.5"><i class="fa-regular fa-face-smile text-xs"></i></button>
-                      <button title="Attachment" onclick="showToast('Attachment dialog')" class="hover:text-slate-700 p-0.5"><i class="fa-solid fa-paperclip text-xs"></i></button>
-                      <button title="Link" onclick="showToast('Insert link')" class="hover:text-slate-700 p-0.5"><i class="fa-solid fa-link text-xs"></i></button>
-                      <button title="Code block" onclick="insertFormatting('```')" class="hover:text-slate-700 p-0.5"><i class="fa-solid fa-pen-ruler text-xs"></i></button>
-                      <button title="Table" onclick="showToast('Insert table')" class="hover:text-slate-700 p-0.5"><i class="fa-solid fa-table-cells text-xs"></i></button>
+                    <div id="mentionPickerModal" class="mention-picker hidden absolute left-3 right-3 bottom-full mb-2 bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden z-40">
+                      <div id="mentionPickerList" class="max-h-64 overflow-y-auto"></div>
                     </div>
                   </div>
                 </div>
@@ -2956,6 +2992,13 @@
     let submitStatusChoice = 'Pending';
     let rightTab = 'fields'; // 'fields', 'user', 'kb'
     let dashboardStatusFilter = '';
+    const AGENT_DIRECTORY = {
+      "MRI Support": { value: "MRI Support", fullName: "Joe Jongue", email: "joe.jongue@mrisoftware.com" },
+      "Alex Rivera": { value: "Alex Rivera", fullName: "Alex Rivera", email: "alex.rivera@mrisoftware.com" },
+      "Sarah Jenkins": { value: "Sarah Jenkins", fullName: "Sarah Jenkins", email: "sarah.jenkins@mrisoftware.com" },
+      "Marcus Vance": { value: "Marcus Vance", fullName: "Marcus Vance", email: "marcus.vance@mrisoftware.com" }
+    };
+    let mentionState = { range: null, selectedIndex: 0, agents: [] };
 
     // --- APPLICATION INITIALIZATION ---
     window.addEventListener('DOMContentLoaded', () => {
@@ -2980,6 +3023,7 @@
         if (e.key === 'Escape') {
           closeSearchOverlay();
           closeAddMenu();
+          closeMentionPicker();
         }
       });
     });
@@ -3044,6 +3088,14 @@
         if (replyMenu && !replyMenu.classList.contains('hidden')) {
           if ((!replyBtn || !replyBtn.contains(e.target)) && !replyMenu.contains(e.target)) {
             closeReplyModeMenu();
+          }
+        }
+
+        const mentionModal = document.getElementById('mentionPickerModal');
+        const composerEditor = document.getElementById('composerTextarea');
+        if (mentionModal && !mentionModal.classList.contains('hidden')) {
+          if ((!composerEditor || !composerEditor.contains(e.target)) && !mentionModal.contains(e.target)) {
+            closeMentionPicker();
           }
         }
 
@@ -3169,14 +3221,319 @@
       });
     }
 
-        function saveCurrentComposerState() {
+    function getComposerEditor() {
+      return document.getElementById('composerTextarea');
+    }
+
+    function getAssignableAgents() {
+      const assigneeField = document.getElementById('fieldAssignee');
+      if (!assigneeField) {
+        return Object.values(AGENT_DIRECTORY);
+      }
+
+      return Array.from(assigneeField.options)
+        .filter(option => option.value && option.value !== '-')
+        .map(option => ({
+          value: option.value,
+          fullName: option.dataset.agentFullName || AGENT_DIRECTORY[option.value]?.fullName || option.value,
+          email: option.dataset.agentEmail || AGENT_DIRECTORY[option.value]?.email || `${option.value.toLowerCase().replace(/\s+/g, '.')}@mrisoftware.com`
+        }));
+    }
+
+    function createMentionNode(agentName) {
+      const mention = document.createElement('span');
+      mention.className = 'composer-mention';
+      mention.dataset.agentName = agentName;
+      mention.contentEditable = 'false';
+      mention.textContent = `@${agentName}`;
+      return mention;
+    }
+
+    function formatComposerSegments(segments) {
+      if (!Array.isArray(segments) || segments.length === 0) return '';
+      return segments.map(segment => {
+        if (!segment) return '';
+        if (segment.type === 'mention' && segment.agentName) {
+          return `<span class="composer-mention" data-agent-name="${escapeHtml(segment.agentName)}" contenteditable="false">@${escapeHtml(segment.agentName)}</span>`;
+        }
+        const text = escapeHtml(segment.text || '');
+        return text.replace(/\n/g, '<br>');
+      }).join('');
+    }
+
+    function updateComposerPlaceholderState() {
+      const editor = getComposerEditor();
+      if (!editor) return;
+      const text = editor.innerText.replace(/\u200B/g, '').trim();
+      editor.dataset.empty = text ? 'false' : 'true';
+    }
+
+    function serializeComposerContent() {
+      const editor = getComposerEditor();
+      if (!editor) return { text: '', richText: [] };
+
+      const richText = [];
+      let plainText = '';
+
+      function appendText(text) {
+        if (!text) return;
+        richText.push({ type: 'text', text });
+        plainText += text;
+      }
+
+      function walk(node) {
+        if (!node) return;
+        if (node.nodeType === Node.TEXT_NODE) {
+          appendText(node.textContent || '');
+          return;
+        }
+        if (node.nodeName === 'BR') {
+          appendText('\n');
+          return;
+        }
+        if (node.nodeType !== Node.ELEMENT_NODE) return;
+        if (node.classList && node.classList.contains('composer-mention')) {
+          const agentName = node.dataset.agentName || node.textContent.replace(/^@/, '').trim();
+          richText.push({ type: 'mention', agentName });
+          plainText += `@${agentName}`;
+          return;
+        }
+
+        const isBlock = ['DIV', 'P'].includes(node.nodeName);
+        node.childNodes.forEach(walk);
+        if (isBlock && node.nextSibling && plainText && !plainText.endsWith('\n')) {
+          appendText('\n');
+        }
+      }
+
+      editor.childNodes.forEach(walk);
+
+      return { text: plainText.replace(/\u00A0/g, ' '), richText };
+    }
+
+    function getComposerText() {
+      return serializeComposerContent().text;
+    }
+
+    function setComposerContent(segments) {
+      const editor = getComposerEditor();
+      if (!editor) return;
+      editor.innerHTML = formatComposerSegments(segments);
+      updateComposerPlaceholderState();
+      closeMentionPicker();
+    }
+
+    function setComposerPlainText(text) {
+      setComposerContent(text ? [{ type: 'text', text }] : []);
+    }
+
+    function focusComposerAtEnd() {
+      const editor = getComposerEditor();
+      if (!editor) return;
+      editor.focus();
+      const range = document.createRange();
+      range.selectNodeContents(editor);
+      range.collapse(false);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+
+    function insertTextIntoComposer(text) {
+      const editor = getComposerEditor();
+      if (!editor) return;
+      editor.focus();
+      const selection = window.getSelection();
+      if (!selection.rangeCount || !editor.contains(selection.anchorNode)) {
+        focusComposerAtEnd();
+      }
+      const activeSelection = window.getSelection();
+      if (!activeSelection.rangeCount) return;
+      const range = activeSelection.getRangeAt(0);
+      range.deleteContents();
+      const textNode = document.createTextNode(text);
+      range.insertNode(textNode);
+      range.setStartAfter(textNode);
+      range.collapse(true);
+      activeSelection.removeAllRanges();
+      activeSelection.addRange(range);
+      updateComposerPlaceholderState();
+      saveCurrentComposerState();
+    }
+
+    function getComposerMentionMatch() {
+      if (composerMode !== 'internal') return null;
+      const editor = getComposerEditor();
+      const selection = window.getSelection();
+      if (!editor || !selection.rangeCount || !selection.isCollapsed || !editor.contains(selection.anchorNode)) return null;
+      if (selection.anchorNode && selection.anchorNode.parentElement && selection.anchorNode.parentElement.closest('.composer-mention')) return null;
+
+      const container = selection.anchorNode;
+      if (!container || container.nodeType !== Node.TEXT_NODE) return null;
+
+      const textBeforeCaret = (container.textContent || '').slice(0, selection.anchorOffset);
+      const match = textBeforeCaret.match(/(^|\s)@([^\s@]*)$/);
+      if (!match) return null;
+
+      const range = document.createRange();
+      range.setStart(container, selection.anchorOffset - (match[2].length + 1));
+      range.setEnd(container, selection.anchorOffset);
+
+      return {
+        query: match[2].toLowerCase(),
+        range
+      };
+    }
+
+    function renderMentionPickerList() {
+      const list = document.getElementById('mentionPickerList');
+      if (!list) return;
+
+      if (!mentionState.agents.length) {
+        list.innerHTML = '<div class="px-4 py-3 text-xs text-slate-500">No matching agents found.</div>';
+        return;
+      }
+
+      list.innerHTML = mentionState.agents.map((agent, index) => `
+        <button
+          type="button"
+          onmousedown="event.preventDefault()"
+          onclick="insertAgentMention(${index})"
+          class="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${index === mentionState.selectedIndex ? 'bg-slate-100' : 'hover:bg-slate-50'}"
+        >
+          <div class="w-9 h-9 rounded-full bg-slate-200 text-slate-700 font-semibold text-xs flex items-center justify-center shrink-0">
+            ${escapeHtml(getInitials(agent.fullName))}
+          </div>
+          <div class="min-w-0">
+            <div class="text-sm text-slate-800 font-medium">${escapeHtml(agent.fullName)}</div>
+            <div class="text-xs text-slate-500 truncate">${escapeHtml(agent.email)}</div>
+          </div>
+        </button>
+      `).join('');
+    }
+
+    function openMentionPicker(match) {
+      const modal = document.getElementById('mentionPickerModal');
+      if (!modal) return;
+
+      const agents = getAssignableAgents().filter(agent => {
+        if (!match.query) return true;
+        return agent.fullName.toLowerCase().includes(match.query) || agent.email.toLowerCase().includes(match.query);
+      });
+
+      mentionState = {
+        range: match.range.cloneRange(),
+        selectedIndex: 0,
+        agents
+      };
+
+      renderMentionPickerList();
+      modal.classList.remove('hidden');
+      requestAnimationFrame(() => modal.classList.add('is-open'));
+    }
+
+    function closeMentionPicker() {
+      const modal = document.getElementById('mentionPickerModal');
+      if (!modal) return;
+      modal.classList.remove('is-open');
+      setTimeout(() => {
+        if (!modal.classList.contains('is-open')) {
+          modal.classList.add('hidden');
+        }
+      }, 200);
+      mentionState = { range: null, selectedIndex: 0, agents: [] };
+    }
+
+    function updateMentionPicker() {
+      const match = getComposerMentionMatch();
+      if (!match) {
+        closeMentionPicker();
+        return;
+      }
+      openMentionPicker(match);
+    }
+
+    function insertAgentMention(index) {
+      const editor = getComposerEditor();
+      const selection = window.getSelection();
+      const agent = mentionState.agents[index];
+      if (!editor || !mentionState.range || !agent) return;
+
+      editor.focus();
+      const range = mentionState.range.cloneRange();
+      range.deleteContents();
+
+      const mention = createMentionNode(agent.fullName);
+      const trailingSpace = document.createTextNode(' ');
+      range.insertNode(trailingSpace);
+      range.insertNode(mention);
+
+      const caretRange = document.createRange();
+      caretRange.setStartAfter(trailingSpace);
+      caretRange.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(caretRange);
+
+      updateComposerPlaceholderState();
+      closeMentionPicker();
+      saveCurrentComposerState();
+    }
+
+    function handleComposerInput() {
+      updateComposerPlaceholderState();
+      updateMentionPicker();
+      saveCurrentComposerState();
+    }
+
+    function handleComposerKeyup(event) {
+      if (['ArrowLeft', 'ArrowRight', 'Escape'].includes(event.key)) {
+        updateMentionPicker();
+      }
+    }
+
+    function handleComposerKeydown(event) {
+      if (mentionState.agents.length) {
+        if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          mentionState.selectedIndex = (mentionState.selectedIndex + 1) % mentionState.agents.length;
+          renderMentionPickerList();
+          return;
+        }
+        if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          mentionState.selectedIndex = (mentionState.selectedIndex - 1 + mentionState.agents.length) % mentionState.agents.length;
+          renderMentionPickerList();
+          return;
+        }
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          insertAgentMention(mentionState.selectedIndex);
+          return;
+        }
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          closeMentionPicker();
+          return;
+        }
+      }
+
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        if (document.execCommand) {
+          document.execCommand('insertLineBreak');
+        }
+        updateComposerPlaceholderState();
+        saveCurrentComposerState();
+      }
+    }
+
+    function saveCurrentComposerState() {
       if (typeof activeTabId === 'undefined' || !activeTabId) return;
       const ticket = getTicketById(activeTabId);
       if (ticket) {
-        const textarea = document.getElementById('composerTextarea');
-        if (textarea) {
-          ticket.draftComposerText = textarea.value;
-        }
+        const composerContent = serializeComposerContent();
+        ticket.draftComposerText = composerContent.text;
+        ticket.draftComposerRichText = composerContent.richText;
         if (typeof composerMode !== 'undefined') ticket.composerMode = composerMode;
         if (typeof submitStatusChoice !== 'undefined') ticket.submitStatusChoice = submitStatusChoice;
       }
@@ -3263,8 +3620,7 @@
       // Check current composer textarea content if this tab is active
       let composerText = '';
       if (activeTabId.toString() === tabId.toString()) {
-        const textarea = document.getElementById('composerTextarea');
-        if (textarea) composerText = textarea.value.trim();
+        composerText = getComposerText().trim();
         const subjectInput = document.getElementById('ticketSubjectInput');
         if (subjectInput && ticket.isDraft) {
           ticket.subject = subjectInput.value;
@@ -3289,7 +3645,7 @@
         const defaultKeys = [
           'id', 'isDraft', 'subject', 'requester', 'email', 'avatar', 'status', 
           'priority', 'type', 'assignee', 'brand', 'form', 'productType', 
-          'requested', 'tags', 'messages', 'submitStatusChoice', 'draftComposerText'
+          'requested', 'tags', 'messages', 'submitStatusChoice', 'draftComposerText', 'draftComposerRichText'
         ];
         for (let key in ticket) {
           if (defaultKeys.includes(key)) continue;
@@ -5025,7 +5381,7 @@
               </div>
               <span class="text-[10px] text-zdTextMuted">${msg.time}</span>
             </div>
-            <div class="text-xs text-zdTextDark leading-relaxed whitespace-pre-wrap pl-9.5">${escapeHtml(msg.text)}</div>
+            <div class="text-xs text-zdTextDark leading-relaxed whitespace-pre-wrap pl-9.5">${formatComposerSegments(msg.richText && msg.richText.length ? msg.richText : [{ type: 'text', text: msg.text || '' }])}</div>
           `;
 
           feed.appendChild(card);
@@ -5035,9 +5391,10 @@
       // Restore composer mode, submit status choice, and composer draft text for this specific ticket
       setComposerMode(ticket.composerMode || 'public');
 
-      const textarea = document.getElementById('composerTextarea');
-      if (textarea) {
-        textarea.value = ticket.draftComposerText || '';
+      if (ticket.draftComposerRichText && ticket.draftComposerRichText.length) {
+        setComposerContent(ticket.draftComposerRichText);
+      } else {
+        setComposerPlainText(ticket.draftComposerText || '');
       }
 
       // Update submit status choice button text
@@ -5635,7 +5992,7 @@
 
       if (mode === 'internal') {
         if (box) box.classList.add('composer-internal');
-        if (textarea) textarea.placeholder = "Type an internal note visible only to support agents...";
+        if (textarea) textarea.dataset.placeholder = "Type an internal note visible only to support agents...";
         if (btnText) btnText.innerText = 'Internal note';
         if (btnIcon) btnIcon.className = 'fa-regular fa-note-sticky text-xs text-amber-700 inline-block';
         if (btnBtn) btnBtn.className = 'text-xs font-semibold py-1 px-2.5 rounded-md text-amber-900 bg-amber-100/90 hover:bg-amber-200/80 border border-amber-300 flex items-center space-x-1.5 transition-colors cursor-pointer focus:outline-none';
@@ -5650,7 +6007,7 @@
         if (toContainer) toContainer.classList.add('hidden');
       } else {
         if (box) box.classList.remove('composer-internal');
-        if (textarea) textarea.placeholder = "Type your response here...";
+        if (textarea) textarea.dataset.placeholder = "Type your response here...";
         if (btnText) btnText.innerText = 'Public reply';
         if (btnIcon) btnIcon.className = 'fa-solid fa-reply text-xs text-[#1f73b7] rotate-180 inline-block';
         if (btnBtn) btnBtn.className = 'text-xs font-semibold py-1 px-2.5 rounded-md text-[#1f73b7] bg-blue-50/80 hover:bg-blue-100/80 border border-blue-200/80 flex items-center space-x-1.5 transition-colors cursor-pointer focus:outline-none';
@@ -5663,7 +6020,9 @@
         if (chkInternal) chkInternal.classList.add('opacity-0');
 
         if (toContainer) toContainer.classList.remove('hidden');
+        closeMentionPicker();
       }
+      updateComposerPlaceholderState();
     }
 
     function toggleReplyModeMenu(event) {
@@ -5864,8 +6223,7 @@
 
       const brandText = document.getElementById('brandSelectedText') ? document.getElementById('brandSelectedText').innerText.trim() : (ticket.brand || '-');
       const subjectText = (document.getElementById('ticketSubjectInput') ? document.getElementById('ticketSubjectInput').value : (ticket.subject || '')).trim();
-      const textarea = document.getElementById('composerTextarea');
-      const composerText = textarea ? textarea.value.trim() : '';
+      const composerText = getComposerText().trim();
 
       const isDraft = ticket.isDraft || (typeof activeTabId === 'string' && activeTabId.startsWith('draft-'));
       const hasMessages = ticket.messages && ticket.messages.length > 0;
@@ -5910,8 +6268,8 @@
         return;
       }
 
-      const textarea = document.getElementById('composerTextarea');
-      const text = textarea ? textarea.value.trim() : '';
+      const composerContent = serializeComposerContent();
+      const text = composerContent.text.trim();
       const isDraft = ticket.isDraft || (typeof activeTabId === 'string' && activeTabId.startsWith('draft-'));
 
       if (isDraft) {
@@ -5932,14 +6290,17 @@
             role: "Agent",
             time: "Just now",
             isInternal: composerMode === 'internal',
-            text: text
+            text: text,
+            richText: composerContent.richText
           });
-          if (textarea) textarea.value = '';
+          setComposerPlainText('');
           ticket.draftComposerText = '';
+          ticket.draftComposerRichText = [];
         }
 
         ticket.draftComposerText = '';
-        if (textarea) textarea.value = '';
+        ticket.draftComposerRichText = [];
+        setComposerPlainText('');
         tickets.push(ticket);
         delete draftTickets[oldTabId];
 
@@ -5967,12 +6328,14 @@
             role: "Agent",
             time: "Just now",
             isInternal: composerMode === 'internal',
-            text: text
+            text: text,
+            richText: composerContent.richText
           });
         }
         
         ticket.draftComposerText = '';
-        if (textarea) textarea.value = '';
+        ticket.draftComposerRichText = [];
+        setComposerPlainText('');
 
         const targetStatus = ticket.submitStatusChoice || submitStatusChoice || ticket.status || 'Open';
         ticket.status = targetStatus;
@@ -6166,46 +6529,46 @@
       const ticket = getTicketById(activeTabId);
       if (!ticket) return;
 
-      const textarea = document.getElementById('composerTextarea');
       const reqFirstName = (ticket.requester && ticket.requester !== '-') ? ticket.requester.split(' ')[0] : 'there';
 
       if (macroKey === 'macro-pwd') {
         setComposerMode('public');
-        if (textarea) textarea.value = `Hi ${reqFirstName},\n\nHere are the instructions to reset your account password:\n1. Click the self-service reset link sent in your email.\n2. Ensure your browser cookies are cleared or use an Incognito window.\n3. Enter your new password following our 12-character security policy.\n\nPlease let us know if you encounter any further issues!`;
-                if (!ticket.tags) ticket.tags = [];
+        setComposerPlainText(`Hi ${reqFirstName},\n\nHere are the instructions to reset your account password:\n1. Click the self-service reset link sent in your email.\n2. Ensure your browser cookies are cleared or use an Incognito window.\n3. Enter your new password following our 12-character security policy.\n\nPlease let us know if you encounter any further issues!`);
+        if (!ticket.tags) ticket.tags = [];
         if (!ticket.tags.includes('password_reset')) ticket.tags.push('password_reset');
         showToast('Applied macro: Password Reset Instructions');
       } else if (macroKey === 'macro-screenshot') {
         setComposerMode('public');
-        if (textarea) textarea.value = `Hi ${reqFirstName},\n\nTo help us investigate this issue further, could you please reply with:\n1. A full screenshot of the error page including the URL bar.\n2. Developer Console logs (F12 key -> Console tab).\n3. The exact timestamp when this error occurred.\n\nThank you for your assistance!`;
-                showToast('Applied macro: Request Screenshot & Logs');
+        setComposerPlainText(`Hi ${reqFirstName},\n\nTo help us investigate this issue further, could you please reply with:\n1. A full screenshot of the error page including the URL bar.\n2. Developer Console logs (F12 key -> Console tab).\n3. The exact timestamp when this error occurred.\n\nThank you for your assistance!`);
+        showToast('Applied macro: Request Screenshot & Logs');
       } else if (macroKey === 'macro-escalate') {
         setComposerMode('internal');
-        if (textarea) textarea.value = `Escalating ticket to Tier 2 Engineering.\n- Customer impact: High\n- Troubleshooting performed: Verified account status and replicated issue.\n- Reassigned to Marcus Vance.`;
+        setComposerPlainText(`Escalating ticket to Tier 2 Engineering.\n- Customer impact: High\n- Troubleshooting performed: Verified account status and replicated issue.\n- Reassigned to Marcus Vance.`);
         ticket.assignee = 'Marcus Vance';
         ticket.priority = 'High';
         showToast('Applied macro: Escalate to Tier 2 Engineering');
       } else if (macroKey === 'macro-refund') {
         setComposerMode('public');
-        if (textarea) textarea.value = `Hi ${reqFirstName},\n\nWe have reviewed your request and successfully authorized a full refund for invoice #INV-98231 ($299.00).\n\nPlease allow 3-5 business days for the credit to reflect on your statement.\n\nThank you for your patience!`;
-                if (!ticket.tags) ticket.tags = [];
+        setComposerPlainText(`Hi ${reqFirstName},\n\nWe have reviewed your request and successfully authorized a full refund for invoice #INV-98231 ($299.00).\n\nPlease allow 3-5 business days for the credit to reflect on your statement.\n\nThank you for your patience!`);
+        if (!ticket.tags) ticket.tags = [];
         if (!ticket.tags.includes('refund_processed')) ticket.tags.push('refund_processed');
         showToast('Applied macro: Refund Approved');
       } else if (macroKey === 'macro-cache') {
         setComposerMode('public');
-        if (textarea) textarea.value = `Hi ${reqFirstName},\n\nMany common display issues can be resolved by clearing your browser cache:\n1. Open your browser settings and navigate to Privacy & Security.\n2. Select "Clear browsing data" and choose "Cached images and files".\n3. Restart your browser and log back into your portal.\n\nPlease let us know if the issue persists!`;
-                showToast('Applied macro: Clear Browser Cache');
+        setComposerPlainText(`Hi ${reqFirstName},\n\nMany common display issues can be resolved by clearing your browser cache:\n1. Open your browser settings and navigate to Privacy & Security.\n2. Select "Clear browsing data" and choose "Cached images and files".\n3. Restart your browser and log back into your portal.\n\nPlease let us know if the issue persists!`);
+        showToast('Applied macro: Clear Browser Cache');
       } else if (macroKey === 'macro-call') {
         setComposerMode('public');
-        if (textarea) textarea.value = `Hi ${reqFirstName},\n\nI would be happy to jump on a quick screen-share session to walk through this together. Please select a time slot that works best for you using our online booking calendar link below:\nhttps://support.mrisoftware.com/schedule-call\n\nLooking forward to speaking with you!`;
-                showToast('Applied macro: Schedule Support Call');
+        setComposerPlainText(`Hi ${reqFirstName},\n\nI would be happy to jump on a quick screen-share session to walk through this together. Please select a time slot that works best for you using our online booking calendar link below:\nhttps://support.mrisoftware.com/schedule-call\n\nLooking forward to speaking with you!`);
+        showToast('Applied macro: Schedule Support Call');
       } else if (macroKey === 'macro-close-inactive') {
         setComposerMode('public');
-        if (textarea) textarea.value = `Hi ${reqFirstName},\n\nWe haven't heard back from you in a few days, so we're marking this ticket as solved. If you still need help, simply reply to this email and the ticket will automatically reopen.\n\nHave a great day!`;
-                showToast('Applied macro: Closing Inactive Ticket');
+        setComposerPlainText(`Hi ${reqFirstName},\n\nWe haven't heard back from you in a few days, so we're marking this ticket as solved. If you still need help, simply reply to this email and the ticket will automatically reopen.\n\nHave a great day!`);
+        showToast('Applied macro: Closing Inactive Ticket');
       }
 
-      ticket.draftComposerText = textarea ? textarea.value : '';
+      ticket.draftComposerText = getComposerText();
+      ticket.draftComposerRichText = serializeComposerContent().richText;
       ticket.composerMode = composerMode;
       ticket.submitStatusChoice = submitStatusChoice;
       renderTicketDetail(ticket.id);
@@ -6257,8 +6620,9 @@
     }
 
     function insertKbSnippet(title, snippet) {
-      const textarea = document.getElementById('composerTextarea');
-      textarea.value += `\n\nReference Article - ${title}:\n${snippet}`;
+      const prefix = getComposerText() ? `\n\nReference Article - ${title}:\n${snippet}` : `Reference Article - ${title}:\n${snippet}`;
+      focusComposerAtEnd();
+      insertTextIntoComposer(prefix);
       saveCurrentComposerState();
       showToast('Inserted Knowledge Base article link');
     }
@@ -6383,13 +6747,27 @@
     }
 
     function insertFormatting(symbol) {
-      const textarea = document.getElementById('composerTextarea');
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const text = textarea.value;
-      const selected = text.substring(start, end) || "text";
-      textarea.value = text.substring(0, start) + symbol + selected + symbol + text.substring(end);
-      textarea.focus();
+      const editor = getComposerEditor();
+      const selection = window.getSelection();
+      if (!editor) return;
+
+      editor.focus();
+      if (!selection.rangeCount || !editor.contains(selection.anchorNode)) {
+        insertTextIntoComposer(`${symbol}text${symbol}`);
+        return;
+      }
+
+      const range = selection.getRangeAt(0);
+      const selectedText = range.toString() || 'text';
+      range.deleteContents();
+      const textNode = document.createTextNode(`${symbol}${selectedText}${symbol}`);
+      range.insertNode(textNode);
+      range.setStartAfter(textNode);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      updateComposerPlaceholderState();
+      saveCurrentComposerState();
     }
 
     function showToast(message) {
