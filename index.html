@@ -331,7 +331,7 @@
         <div class="w-6 border-t border-slate-300/70 mx-auto"></div>
 
         <!-- Analytics / Explore -->
-        <button id="nav-reports" onclick="switchNav('reports')" title="Reporting & Analytics" class="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-200/60 rounded-lg transition-all">
+        <button id="nav-reports" disabled title="Reporting & Analytics" class="w-8 h-8 flex items-center justify-center text-slate-300 rounded-lg cursor-not-allowed opacity-40">
           <i class="fa-solid fa-chart-column text-xs"></i>
         </button>
 
@@ -631,10 +631,28 @@
             <div class="flex items-center justify-between mb-3 text-xs text-slate-500">
               <div id="dashTicketCountText" class="font-normal text-slate-600">0 tickets</div>
               <div class="flex items-center space-x-4">
-                <button class="flex items-center space-x-1 hover:text-slate-800 transition-colors" onclick="showToast('Status filter')">
-                  <span>Status</span>
-                  <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
-                </button>
+                <!-- Status filter with dropdown -->
+                <div class="relative">
+                  <button id="dashStatusFilterBtn" class="flex items-center space-x-1 hover:text-slate-800 transition-colors" onclick="toggleDashStatusFilter(event)">
+                    <span>Status</span>
+                    <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                  </button>
+                  <div id="dashStatusFilterMenu" class="hidden absolute left-0 top-6 w-44 bg-white border border-slate-200 rounded-lg shadow-xl py-1.5 z-50 text-xs">
+                    <div class="px-3 py-1.5 hover:bg-blue-50 cursor-pointer text-[#1f73b7]">Open</div>
+                    <div class="px-3 py-1.5 hover:bg-blue-50 cursor-pointer text-slate-700">Responding</div>
+                    <div class="px-3 py-1.5 hover:bg-blue-50 cursor-pointer text-[#1f73b7]">Client Return</div>
+                    <div class="px-3 py-1.5 hover:bg-blue-50 cursor-pointer text-amber-600">Rescheduled</div>
+                    <div class="px-3 py-1.5 hover:bg-blue-50 cursor-pointer text-amber-500">Pending</div>
+                    <div class="px-3 py-1.5 hover:bg-blue-50 cursor-pointer text-orange-500">Snoozed</div>
+                    <div class="px-3 py-1.5 hover:bg-blue-50 cursor-pointer text-[#1f73b7]">Waiting On Client</div>
+                    <div class="px-3 py-1.5 hover:bg-blue-50 cursor-pointer text-[#1f73b7]">Left Message</div>
+                    <div class="px-3 py-1.5 hover:bg-blue-50 cursor-pointer text-red-600">On-hold</div>
+                    <div class="px-3 py-1.5 hover:bg-blue-50 cursor-pointer text-[#1f73b7]">Investigating</div>
+                    <div class="border-t border-slate-100 mt-1 pt-1">
+                      <div class="px-3 py-1.5 hover:bg-blue-50 cursor-pointer text-[#1f73b7]" onclick="closeDashStatusFilter()">Clear filters</div>
+                    </div>
+                  </div>
+                </div>
                 <button class="flex items-center space-x-1 hover:text-slate-800 transition-colors" onclick="showToast('Channel filter')">
                   <span>Channel</span>
                   <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
@@ -6613,6 +6631,17 @@
       openSearchPageTab(query);
     }
 
+    function toggleDashStatusFilter(event) {
+      if (event) event.stopPropagation();
+      const menu = document.getElementById('dashStatusFilterMenu');
+      if (menu) menu.classList.toggle('hidden');
+    }
+
+    function closeDashStatusFilter() {
+      const menu = document.getElementById('dashStatusFilterMenu');
+      if (menu) menu.classList.add('hidden');
+    }
+
     // Global click listener to close dropdowns when clicking outside
     document.addEventListener('click', (e) => {
       const addMenu = document.getElementById('addMenuDropdown');
@@ -6696,6 +6725,14 @@
       if (convDrawer && !convDrawer.classList.contains('hidden')) {
         if ((!convBtnEl || !convBtnEl.contains(e.target)) && !convDrawer.contains(e.target)) {
           closeConversationsDrawer();
+        }
+      }
+
+      const dashStatusMenu = document.getElementById('dashStatusFilterMenu');
+      const dashStatusBtn = document.getElementById('dashStatusFilterBtn');
+      if (dashStatusMenu && !dashStatusMenu.classList.contains('hidden')) {
+        if ((!dashStatusBtn || !dashStatusBtn.contains(e.target)) && !dashStatusMenu.contains(e.target)) {
+          dashStatusMenu.classList.add('hidden');
         }
       }
     });
