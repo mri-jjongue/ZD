@@ -2283,7 +2283,7 @@
                       </div>
                     </div>
                     
-                    <div id="mentionPickerModal" class="mention-picker hidden absolute left-3 right-3 bottom-full mb-2 bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden z-40">
+                    <div id="mentionPickerModal" class="mention-picker hidden absolute left-3 bottom-full mb-2 bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden z-40 max-w-[calc(100%-1.5rem)]">
                       <div id="mentionPickerList" class="max-h-64 overflow-y-auto"></div>
                     </div>
                   </div>
@@ -3412,6 +3412,18 @@
       `).join('');
     }
 
+    function updateMentionPickerWidth(modal, agents) {
+      if (!modal) return;
+      const parentWidth = modal.parentElement ? modal.parentElement.getBoundingClientRect().width : window.innerWidth;
+      const maxWidth = Math.max(220, parentWidth - 24);
+      const longestNameWidth = Math.max(...(agents || []).map(agent => {
+        const name = agent && agent.fullName ? agent.fullName : '';
+        return name.length * 8;
+      }), 120);
+      const desiredWidth = Math.max(260, Math.ceil(longestNameWidth + 112));
+      modal.style.width = `${Math.min(maxWidth, desiredWidth)}px`;
+    }
+
     function openMentionPicker(match) {
       const modal = document.getElementById('mentionPickerModal');
       if (!modal) return;
@@ -3427,6 +3439,7 @@
         agents
       };
 
+      updateMentionPickerWidth(modal, agents);
       renderMentionPickerList();
       modal.classList.remove('hidden');
       requestAnimationFrame(() => modal.classList.add('is-open'));
